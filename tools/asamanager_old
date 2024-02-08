@@ -1,14 +1,13 @@
 #!/bin/bash
 # shellcheck disable=SC2031,SC2155
 
-# ARK: survival evolved manager
+# ASA: survival evolved manager
 #
 # Original author:      LeXaT
 # Original Maintainer:  FezVrasta
-# Current Maintainer:   klightspeed (arkmanager/ark-server-tools)
+# Current Maintainer:   klightspeed (Norwegian-Vikings/asa-server-tools)
 # Contributors:         Sispheor, Atriusftw, klightspeed, lexat, puseidr, chriscpritchard
-# Fork Maintainer:      StevenB83, mze9412 (Norwegian-Vikings/asa-server-tools)
-
+# Fork Maintainer:      StevenB83, mze9412
 
 ### Proton testing
 export XDG_RUNTIME_DIR='/run/user/0'
@@ -26,19 +25,19 @@ arkstVersion='1.6'
 ### If an override is added, do not put anything after arkstSomeOverride='' in a commit
 
 # Set by installer to git tag (i.e. release version)
-arkstTag='v1.6.62'
+arkstTag=''
 
 # Set by installer to git commit
-arkstCommit='17bcc0b4f8c7cc01603ff308f28b98cd54429e21'
+arkstCommit=''
 
 # Set this if you are a distribution package maintainer otherwise leave empty
 arkstUsePkgManager=''
 
-# Set this to allow variable expansion in variables sourced from arkmanager.cfg
+# Set this to allow variable expansion in variables sourced from asamanager.cfg
 arkstRootUseEnv=''
 
 # Set this to override the main fork
-arkstGithubRepoOverride='StevenB83/ark-server-tools'
+arkstGithubRepoOverride='Norwegian-Vikings/asa-server-tools'
 
 # Set this to override the global config file path
 arkstGlobalCfgFileOverride=''
@@ -46,12 +45,11 @@ arkstGlobalCfgFileOverride=''
 # Set this to override the user config file path
 arkstUserCfgFileOverride=''
 
-
 ### Do not modify the following settings in an installer or package manager - use the above overrides instead
 
-arkstGithubRepo="${arkstGithubRepoOverride:-arkmanager/ark-server-tools}"
-arkstGlobalCfgFile="${arkstGlobalCfgFileOverride:-/etc/arkmanager/arkmanager.cfg}"
-arkstUserCfgFile="${arkstUserCfgFileOverride:-.arkmanager.cfg}"
+arkstGithubRepo="${arkstGithubRepoOverride:-Norwegian-Vikings/asa-server-tools}"
+arkstGlobalCfgFile="${arkstGlobalCfgFileOverride:-/etc/asamanager/asamanager.cfg}"
+arkstUserCfgFile="${arkstUserCfgFileOverride:-.asamanager.cfg}"
 
 arkstScriptPath="${0}"
 if [[ "${arkstScriptPath}" != /* ]]; then
@@ -60,7 +58,7 @@ fi
 
 doUpgradeTools() {
   if [ -n "$arkstUsePkgManager" ]; then
-    echo "arkmanager v${arkstVersion}: Please check for, and install, updates using your system's package manager"
+    echo "asamanager v${arkstVersion}: Please check for, and install, updates using your system's package manager"
   else
     local sudo=sudo
     if [ "$(id -u)" == 0 ] || [ "$steamcmd_user" == "--me" ]; then
@@ -78,7 +76,7 @@ doUpgradeTools() {
       reinstall_args=( "${reinstall_args[@]}" "--datadir" "$install_datadir" )
     fi
 
-    echo "arkmanager v${arkstVersion}: Checking for updates..."
+    echo "asamanager v${arkstVersion}: Checking for updates..."
 
     if [ -n "$arkstUnstable" ] || [ "$arkstChannel" != "master" ]; then
       doUpgradeToolsFromBranch
@@ -95,12 +93,12 @@ doUpgradeToolsFromCommit(){
   fi
 
   local commit="$1"
-  tmpdir="$(mktemp -d "ark-server-tools-XXXXXXXX")"
+  tmpdir="$(mktemp -d "asa-server-tools-XXXXXXXX")"
   if [ -z "$tmpdir" ]; then echo "Unable to create temporary directory"; exit 1; fi
   cd "$tmpdir"
   echo "Downloading installer"
   curl -s -L "https://github.com/${arkstGithubRepo}/archive/${commit}.tar.gz" | tar -xz
-  cd "ark-server-tools-${commit}/tools"
+  cd "asa-server-tools-${commit}/tools"
   if [ ! -f "install.sh" ]; then echo "install.sh not found in $PWD"; exit 1; fi
   sed -i -e "s|^arkstCommit='.*'|arkstCommit='${commit}'|" \
          -e "s|^arkstTag='.*'|arkstTag='${tagname}'|" \
@@ -108,7 +106,7 @@ doUpgradeToolsFromCommit(){
          -e "s|^arkstGithubRepoOverride='.*'|arkstGithubRepoOverride='${arkstGithubRepoOverride}'|" \
          -e "s|^arkstGlobalCfgFileOverride='.*'|arkstGlobalCfgFileOverride='${arkstGlobalCfgFileOverride}'|" \
          -e "s|^arkstUserCfgFileOverride='.*'|arkstUserCfgFileOverride='${arkstUserCfgFileOverride}'|" \
-         arkmanager
+         asamanager
   echo "Running install.sh"
   $sudo bash install.sh "$steamcmd_user" "${reinstall_args[@]}"
   result=$?
@@ -116,10 +114,10 @@ doUpgradeToolsFromCommit(){
   rm -rf "$tmpdir"
 
   if [ "$result" = 0 ] || [ "$result" = 2 ]; then
-    echo "ARK Server Tools successfully upgraded"
+    echo "ASA Server Tools successfully upgraded"
     "${arkstScriptPath}" --version
   else
-    echo "ARK Server Tools upgrade failed"
+    echo "ASA Server Tools upgrade failed"
   fi
   exit $result
 }
@@ -140,13 +138,13 @@ doUpgradeToolsFromBranch(){
   REPLY=
 
   if [[ "$arkstLatestVersion" > "$arkstVersion" ]]; then
-    read -p "A new version was found! Do you want to upgrade ARK Server Tools to v${arkstLatestVersion}?" -n 1 -r
+    read -p "A new version was found! Do you want to upgrade ASA Server Tools to v${arkstLatestVersion}?" -n 1 -r
     echo
   elif [[ "$arkstLatestVersion" == "$arkstVersion" && "$arkstLatestCommit" != "$arkstCommit" ]]; then
     read -p "A hotfix is available for v${arkstLatestVersion}.  Do you wish to install it?" -n 1 -r
     echo
   else
-    echo "Your ARK server tools are already up to date"
+    echo "Your ASA server tools are already up to date"
   fi
 
   if [[ "$REPLY" =~ ^[Yy]$ ]]; then
@@ -179,7 +177,7 @@ doUpgradeToolsFromRelease(){
         doUpgradeToolsFromCommit "$commit"
       fi
     else
-      echo "Your ARK server tools are already up to date"
+      echo "Your ASA server tools are already up to date"
     fi
   else
     echo "Unable to get latest release"
@@ -188,21 +186,21 @@ doUpgradeToolsFromRelease(){
 
 doUninstallTools() {
   if [ -n "$arkstUsePkgManager" ]; then
-    echo "arkmanager v${arkstVersion}: Please uninstall using your system's package manager"
+    echo "asamanager v${arkstVersion}: Please uninstall using your system's package manager"
   else
     local sudo=sudo
     if [ "$(id -u)" == 0 ] || [ "$steamcmd_user" == "--me" ]; then
       sudo=
     fi
 
-    read -p "Are you sure you want to uninstall the ARK Server Tools? [y/N]" -n 1 -r
+    read -p "Are you sure you want to uninstall the ASA Server Tools? [y/N]" -n 1 -r
 
     if [[ "$REPLY" =~ ^[Yy]$ ]]; then
-      if [ -n "${install_datadir}" ] && [ -x "${install_datadir}/arkmanager-uninstall.sh" ]; then
-        $sudo "${install_datadir}/arkmanager-uninstall.sh"
+      if [ -n "${install_datadir}" ] && [ -x "${install_datadir}/asamanager-uninstall.sh" ]; then
+        $sudo "${install_datadir}/asamanager-uninstall.sh"
         exit 0
-      elif [ -n "${install_libexecdir}" ] && [ -x "${install_libexecdir}/arkmanager-uninstall.sh" ]; then
-        $sudo "${install_libexecdir}/arkmanager-uninstall.sh"
+      elif [ -n "${install_libexecdir}" ] && [ -x "${install_libexecdir}/asamanager-uninstall.sh" ]; then
+        $sudo "${install_libexecdir}/asamanager-uninstall.sh"
         exit 0
       fi
     fi
@@ -229,8 +227,8 @@ runAsRoot(){
   arkstChannel="$(getConfigVar arkstChannel "master")"
   arkstUnstable="$(getConfigVar arkstUnstable "")"
   install_bindir="$(getConfigVar install_bindir "${0%/*}")"
-  install_libexecdir="$(getConfigVar install_libexecdir "${install_bindir%/*}/libexec/arkmanager")"
-  install_datadir="$(getConfigVar install_datadir "${install_bindir%/*}/share/arkmanager")"
+  install_libexecdir="$(getConfigVar install_libexecdir "${install_bindir%/*}/libexec/asamanager")"
+  install_datadir="$(getConfigVar install_datadir "${install_bindir%/*}/share/asamanager")"
   steamcmd_user="$(getConfigVar steamcmd_user "steam")"
   steamcmd_user_shellexec="$(getConfigVar steamcmd_user_shellexec "${BASH:-/bin/bash}")"
 
@@ -272,12 +270,12 @@ fi
 
 # Global variables
 if [ -f "${arkstGlobalCfgFile}" ]; then
-    # shellcheck source=arkmanager.cfg.shellcheck
+    # shellcheck source=asamanager.cfg.shellcheck
     source "${arkstGlobalCfgFile}"
 fi
 
 if [ -f "${HOME}/${arkstUserCfgFile}" ]; then
-    # shellcheck source=arkmanager.cfg.shellcheck
+    # shellcheck source=asamanager.cfg.shellcheck
     source "${HOME}/${arkstUserCfgFile}"
 fi
 
@@ -312,19 +310,21 @@ NORMAL="\\033[0;39m"
 # Set TERM to "dumb" if TERM is not set
 export TERM=${TERM:-dumb}
 
-arkmanagerLog="arkmanager.log"  # here are logged the actions performed by arkmanager
+asamanagerLog="asamanager.log"  # here are logged the actions performed by asamanager
 arkserverLog="arkserver.log"    # here is logged the output of ShooterGameServer
 
 appid="${appid:-376030}"
 mod_appid="${mod_appid:-346110}"
 install_bindir="${install_bindir:-${0%/*}}"
-install_libexecdir="${install_libexecdir:-${install_bindir%/*}/libexec/arkmanager}"
+install_libexecdir="${install_libexecdir:-${install_bindir%/*}/libexec/asamanager}"
 
 if [ "$steamcmd_user" == "--me" ]; then
-  install_datadir="${install_datadir:-${HOME}/.share/local/arkmanager}"
+  install_datadir="${install_datadir:-${HOME}/.share/local/asamanager}"
 else
-  install_datadir="${install_datadir:-${install_bindir%/*}/share/arkmanager}"
+  install_datadir="${install_datadir:-${install_bindir%/*}/share/asamanager}"
 fi
+
+declare -A modsrcdirs
 
 #---------------------
 # functions
@@ -338,11 +338,11 @@ timestamp() {
 }
 
 #
-# Log a message to arkmanager.log, and exho it to the console
+# Log a message to asamanager.log, and exho it to the console
 #
 logprint(){
   printf "%s\n" "$*"
-  printf "%s: [%s] %s\n" "$(timestamp)" "${instance}" "$*" >>"${logdir}/${arkmanagerLog}"
+  printf "%s: [%s] %s\n" "$(timestamp)" "${instance}" "$*" >>"${logdir}/${asamanagerLog}"
 }
 
 #
@@ -369,7 +369,7 @@ checkConfig() {
   if [ "$1" != "install" ] && [ -n "$instance" ]; then
     # arkserverexec
     if [ -n "$arkserverroot" ] && [ ! -f "$arkserverroot/$arkserverexec" ] ; then
-      echo -e "[" "$YELLOW" "WARN" "$NORMAL" "]" "\tYour ARK server exec could not be found." >&2
+      echo -e "[" "$YELLOW" "WARN" "$NORMAL" "]" "\tYour ASA server exec could not be found." >&2
     fi
 
     # SavedArks directory
@@ -377,9 +377,30 @@ checkConfig() {
       local savedarksdir="${arkserverroot}/${arkserverdir:-ShooterGame}/Saved/${ark_AltSaveDirectoryName:-SavedArks}"
       mkdir -p "${savedarksdir}"
       if [ ! -w "${savedarksdir}" ]; then
-        echo -e "[" "$RED" "ERROR" "$NORMAL" "]" "\tThe ARK SavedArks directory is not writable, and saveworld will fail" >&2
+        echo -e "[" "$RED" "ERROR" "$NORMAL" "]" "\tThe ASA SavedArks directory is not writable, and saveworld will fail" >&2
+      fi
+
+      mkdir -p "${arkserverroot}/${arkserverdir:-ShooterGame}/Content/Mods"
+      if [ ! -w "${arkserverroot}/${arkserverdir:-ShooterGame}/Content/Mods" ]; then
+        echo -e "[" "$RED" "ERROR" "$NORMAL" "]" "\tThe ASA Mods directory is not writable, and installmod will fail" >&2
       fi
     fi
+
+    if [ "$1" != "installmod" ] && [ "$1" != "installmods" ]; then
+      # Warn if any mods are requested but not installed
+      if [ -n "$arkserverroot" ] && [ -d "${arkserverroot}/${arkserverdir:-ShooterGame}/Content/Mods" ]; then
+        for modid in $(getModIds); do
+          if [ ! -f "${arkserverroot}/${arkserverdir:-ShooterGame}/Content/Mods/${modid}/mod.info" ]; then
+            echo -e "[" "$RED" "ERROR" "$NORMAL" "]" "\tMod ${modid} is requested but not installed.  Run 'asamanager installmod ${modid}' to install this mod." >&2
+          fi
+        done
+      fi
+    fi
+  fi
+
+  # Warn if mod_branch=Linux
+  if [ "$mod_branch" == "Linux" ] && [ -z "$nowarnmodbranch" ]; then
+    echo -e "[" "$YELLOW" "WARN" "$NORMAL" "]" "\tmod_branch is set to Linux. Linux mods are known to cause the server to crash. It is suggested you set mod_branch to Windows." >&2
   fi
 
   # Service configuration
@@ -710,6 +731,14 @@ function runSteamCMD(){
   HOME="${steamcmdhome}" "$steamcmdroot/$steamcmdexec" +@NoPromptForPassword 1 ${steamcmd_cmds_prelogin} "${steamcmd_force_install_dir[@]}" +login "${steamlogin:-anonymous}" ${steamcmd_cmds_postlogin} "$@" +quit
 }
 
+function doLogin(){
+ if [[ -z "${steamcmdhome}" || ! -d "${steamcmdhome}" ]]; then
+    steamcmdhome="${HOME}"
+  fi
+  # shellcheck disable=SC2086
+  HOME="${steamcmdhome}" "$steamcmdroot/$steamcmdexec" +login $1 $2 +quit
+}
+
 function runSteamCMDspinner(){
   if [ -n "$verbose" ]; then
     printf "Executing"
@@ -772,7 +801,7 @@ function checkForUpdate(){
     echo -e "Current version:" "$RED" "$instver" "$NORMAL"
     echo -e "Available version:" "$GREEN" "$bnumber" "$NORMAL"
     echo -e "Your server needs to be restarted in order to receive the latest update."
-    echo -e "Run \"arkmanager update\" to do so"
+    echo -e "Run \"asamanager update\" to do so"
     return 1
   else
     tput rc; tput ed;
@@ -901,7 +930,7 @@ function getServerMapName(){
 # Gets the saved worlds directory
 #
 function getSavedArksDirectory(){
-  local savedir="SavedArks/TheIsland_WP"
+  local savedir="SavedArks"
   local saverootdir="$1"
 
   # Get save directory name
@@ -1131,7 +1160,7 @@ doRun() {
   fi
 
   # $$ returns the main process, $BASHPID returns the current process
-  echo "$BASHPID" >"${arkserverroot}/${arkmanagerpidfile}"
+  echo "$BASHPID" >"${arkserverroot}/${asamanagerpidfile}"
 
   if [ -f "${arkserverroot}/${arkupdatelockfile}" ]; then
     local updatepid="$(<"${arkserverroot}/${arkupdatelockfile}")"
@@ -1238,11 +1267,6 @@ doRun() {
       name="${varname#ark_}"
       val="${!varname}"
 
-      # Add ?listen after serverMap
-      #if [[ "$name" == "serverMap" ]]; then
-      #  val="${val}?listen"
-      #fi
-
       # Port is actually one higher than specified
       # i.e. specifying port 7777 will have the server
       # use port 7778
@@ -1328,7 +1352,7 @@ doRun() {
     printf " %q" "$arkserverroot/$arkserverexec" "$arkserveropts" "${arkextraopts[@]}"
     echo
     # Put the server process into the background so we can monitor it
-    /home/steam/.local/share/Steam/compatibilitytools.d/GE-Proton8-23/proton run "$arkserverroot/$arkserverexec" "$arkserveropts" "${arkextraopts[@]}" &
+    "$arkserverroot/$arkserverexec" "$arkserveropts" "${arkextraopts[@]}" &
     # Grab the server PID
     serverpid=$!
     echo "$serverpid" >"${arkserverroot}/${arkserverpidfile}"
@@ -1568,7 +1592,7 @@ doStartAll(){
   for cfg in "${!configfile_@}"; do
     if [ -f "${!cfg}" ]; then
       (
-        # shellcheck source=arkmanager.cfg.shellcheck
+        # shellcheck source=asamanager.cfg.shellcheck
         source "${!cfg}"
         doStart
       )
@@ -1577,7 +1601,7 @@ doStartAll(){
 }
 
 #
-# stop the ARK server
+# stop the ASA server
 #
 doStop() {
   if [ "$1" != "update" ]; then
@@ -1631,8 +1655,8 @@ doStop() {
       kill -KILL "$PID" >/dev/null 2>&1
     fi
 
-    if [ -f "${arkserverroot}/${arkmanagerpidfile}" ]; then
-      PID="$(<"${arkserverroot}/${arkmanagerpidfile}")"
+    if [ -f "${arkserverroot}/${asamanagerpidfile}" ]; then
+      PID="$(<"${arkserverroot}/${asamanagerpidfile}")"
       if [ -n "$PID" ]; then
         kill "$PID" >/dev/null 2>&1
       fi
@@ -1640,7 +1664,7 @@ doStop() {
 
     rm -f "${arkserverroot}/${arkserverpidfile}"
     rm -f "${arkserverroot}/${arkserveroldpidfile}"
-    rm -f "${arkserverroot}/${arkmanagerpidfile}"
+    rm -f "${arkserverroot}/${asamanagerpidfile}"
 
     tput rc; tput ed;
     logprint "The server has been stopped"
@@ -1657,7 +1681,7 @@ doStopAll(){
   for cfg in "${!configfile_@}"; do
     if [ -f "${!cfg}" ]; then
       (
-        # shellcheck source=arkmanager.cfg.shellcheck
+        # shellcheck source=asamanager.cfg.shellcheck
         source "${!cfg}"
         doStop
       )
@@ -1666,7 +1690,7 @@ doStopAll(){
 }
 
 #
-# kills the ARK server
+# kills the ASA server
 #
 doKill() {
   logprint "Killing server"
@@ -1676,7 +1700,7 @@ doKill() {
   kill -KILL "$PID" >/dev/null 2>&1
   rm -f "${arkserverroot}/${arkserverpidfile}"
   rm -f "${arkserverroot}/${arkserveroldpidfile}"
-  rm -f "${arkserverroot}/${arkmanagerpidfile}"
+  rm -f "${arkserverroot}/${asamanagerpidfile}"
   logprint "The server has been killed"
 }
 
@@ -1692,30 +1716,30 @@ runSteamCMDAppUpdate(){
 }
 
 #
-# install of ARK server
+# install of ASA server
 #
 doInstall() {
   # Check if arkserverroot already exists
   if [ ! -d "$arkserverroot" ]; then
     # If it does not exist, try create it
-    echo -e "Creating the ARK server root directory ($arkserverroot)"
+    echo -e "Creating the ASA server root directory ($arkserverroot)"
     mkdir -p "$arkserverroot"
     mkdir -p "${arkserverroot}/steamapps"
     if [ ! $? ] ; then
-      echo -e "[" "$RED" "ERROR" "$NORMAL" "]" "\tFailed to create the defined ARK server root directory ($arkserverroot)"
+      echo -e "[" "$RED" "ERROR" "$NORMAL" "]" "\tFailed to create the defined ASA server root directory ($arkserverroot)"
       exit 1
     fi
   fi
 
   cd "$steamcmdroot"
-  echo -n "Installing ARK server"
+  echo -n "Installing ASA server"
   # install the server
   doDownloadSteamCMD
   runSteamCMDAppUpdate "$arkserverroot" validate
   if [ $? -eq 5 ]; then
     echo "User ${steamlogin:-anonymous} login failed - please login to steamcmd manually"
   elif [ $? -eq 8 ]; then
-    echo "Insufficient disk space to install the ARK server"
+    echo "Insufficient disk space to install the ASA server"
   fi
   # the current version should be the last version. We set our version
   instver="$(getCurrentVersion)"
@@ -1811,13 +1835,13 @@ printWarnMessage(){
         if [ -n "$msgWarnUpdateMinutes" ]; then
           msg="${msgWarnUpdateMinutes//%d/$4}"
         else
-          msg="This ARK server will shutdown for an update in $4 minutes"
+          msg="This ASA server will shutdown for an update in $4 minutes"
         fi
       else
         if [ -n "$msgWarnUpdateSeconds" ]; then
           msg="${msgWarnUpdateSeconds//%d/$4}"
         else
-          msg="This ARK server will shutdown for an update in $4 seconds"
+          msg="This ASA server will shutdown for an update in $4 seconds"
         fi
       fi
     elif [ "$1" == "restart" ]; then
@@ -1825,13 +1849,13 @@ printWarnMessage(){
         if [ -n "$msgWarnRestartMinutes" ]; then
           msg="${msgWarnRestartMinutes//%d/$4}"
         else
-          msg="This ARK server will shutdown for a restart in $4 minutes"
+          msg="This ASA server will shutdown for a restart in $4 minutes"
         fi
       else
         if [ -n "$msgWarnRestartSeconds" ]; then
           msg="${msgWarnRestartSeconds//%d/$4}"
         else
-          msg="This ARK server will shutdown for a restart in $4 seconds"
+          msg="This ASA server will shutdown for a restart in $4 seconds"
         fi
       fi
     else
@@ -1839,13 +1863,13 @@ printWarnMessage(){
         if [ -n "$msgWarnShutdownMinutes" ]; then
           msg="${msgWarnShutdownMinutes//%d/$4}"
         else
-          msg="This ARK server will shutdown in $4 minutes"
+          msg="This ASA server will shutdown in $4 minutes"
         fi
       else
         if [ -n "$msgWarnShutdownSeconds" ]; then
           msg="${msgWarnShutdownSeconds//%d/$4}"
         else
-          msg="This ARK server will shutdown in $4 seconds"
+          msg="This ASA server will shutdown in $4 seconds"
         fi
       fi
     fi
@@ -2038,6 +2062,7 @@ doUpdate() {
   local bgupdate=
   local updatetype=normal
   local validate=
+  local modupdate=
   local saveworld=
   local downloadonly=
   local nodownload=
@@ -2060,6 +2085,7 @@ doUpdate() {
       --warnreason=*) warnreason="${arg#--warnreason=}"; updatetype=warn; ;;
       --validate) validate=validate; appupdate=1; force=1; ;;
       --saveworld) saveworld=1; ;;
+      --update-mods) modupdate=1; ;;
       --backup) arkBackupPreUpdate=true; ;;
       --no-autostart) noautostart=1; ;;
       --stagingdir=*) arkStagingDir="${arg#--stagingdir=}"; ;;
@@ -2072,7 +2098,7 @@ doUpdate() {
       --betapassword=*) appbetapass="${arg#--betapassword=}"; ;;
       *)
         echo "Unrecognized option $arg"
-        echo "Try 'arkmanager -h' or 'arkmanager --help' for more information."
+        echo "Try 'asamanager -h' or 'asamanager --help' for more information."
         exit 1
     esac
   done
@@ -2100,6 +2126,17 @@ doUpdate() {
   rm -f "${arkserverroot}/${arkupdatelockfile}.${BASHPID}"
 
   logprint "Checking for update; PID: ${BASHPID}"
+
+  if [ -n "$modupdate" ]; then
+    if [ -z "$nodownload" ]; then
+      if ! doDownloadAllMods; then
+        modupdate=
+      fi
+    fi
+    if ! isAnyModUpdateNeeded; then
+      modupdate=
+    fi
+  fi
 
   cd "$arkserverroot"
 
@@ -2139,8 +2176,8 @@ doUpdate() {
       rm -f "$arkStagingDir/${arkserverdir}/Binaries/Linux/"*.txt
 
       if [ -z "$nodownload" ]; then
-        echo -n "Downloading ARK update"
-        logprint "Downloading ARK update" >/dev/null
+        echo -n "Downloading ASA update"
+        logprint "Downloading ASA update" >/dev/null
         doDownloadSteamCMD
         cd "$steamcmdroot"
         runSteamCMDAppUpdate "$arkStagingDir" ${appbeta:+-beta} $appbeta ${appbetapass:+-betapassword} $appbetapass $validate
@@ -2173,8 +2210,8 @@ doUpdate() {
     fi
   fi
 
-  if [[ -f "$arkserverroot/$arkmanagerpidfile" && "$arkserverroot/$arkmanagerpidfile" -ot "${arkserverroot}/${arkupdatetimefile}" ]]; then
-    local mgrpid="$(<"$arkserverroot/$arkmanagerpidfile")"
+  if [[ -f "$arkserverroot/$asamanagerpidfile" && "$arkserverroot/$asamanagerpidfile" -ot "${arkserverroot}/${arkupdatetimefile}" ]]; then
+    local mgrpid="$(<"$arkserverroot/$asamanagerpidfile")"
     if (( mgrpid != 0 )); then
       logprint "Server was updated while it was running"
       bgupdate=1
@@ -2185,8 +2222,11 @@ doUpdate() {
     if [ -n "$appupdate" ] && [ -n "$arkStagingDir" ] && [ "$arkStagingDir" != "$arkserverroot" ]; then
       logprint "Server update downloaded"
     fi
+    if [ -n "$modupdate" ]; then
+      logprint "Mod update downloaded"
+    fi
     logprint "Not applying update - download-only requested"
-  elif [ -n "$appupdate" ] || [ -n "$bgupdate" ]; then
+  elif [ -n "$appupdate" ] || [ -n "$modupdate" ] || [ -n "$bgupdate" ]; then
     # version.txt is frequently missing, empty, or out of date
     if false && [ -f "$arkserverroot/version.txt" ]; then
       arkversion="$(<"$arkserverroot/version.txt")"
@@ -2295,8 +2335,8 @@ doUpdate() {
           fi
         done
       else
-        echo -n "Performing ARK update"
-        logprint "Performing ARK update" >/dev/null
+        echo -n "Performing ASA update"
+        logprint "Performing ASA update" >/dev/null
         doDownloadSteamCMD
         cd "$steamcmdroot"
         runSteamCMDAppUpdate "$arkserverroot" ${appbeta:+-beta} $appbeta ${appbetapass:+-betapassword} $appbetapass $validate
@@ -2309,6 +2349,15 @@ doUpdate() {
       logprint "Update to $instver complete"
     fi
 
+    if [ -n "$modupdate" ] && [ -z "$arkflag_automanagedmods" ]; then
+      for modid in $(getModIds); do
+        if isModUpdateNeeded "$modid"; then
+          logprint "Updating mod $modid"
+          doExtractMod "$modid"
+          logprint "Mod $modid updated"
+        fi
+      done
+    fi
     if [ -z "$bgupdate" ]; then
       touch "${arkserverroot}/${arkupdatetimefile}"
     fi
@@ -2324,21 +2373,718 @@ doUpdate() {
       if [ $serverWasAlive -eq 1 ] || [ -f "${arkserverroot}/.startAfterUpdate-${instance}" ]; then
         rm -f "${arkserverroot}/.startAfterUpdate-${instance}"
         if [ -n "$use_systemd" ]; then
-          sudo systemctl start "arkmanager@$instance"
+          sudo systemctl start "asamanager@$instance"
         elif [ -n "$use_service" ]; then
-          if [ -f "/etc/init.d/arkmanager" ]; then
-            sudo "/etc/init.d/arkmanager" start "$instance"
-          elif [ -f "/etc/rc.d/init.d/arkmanager" ]; then
-            sudo "/etc/rc.d/init.d/arkmanager" start "$instance"
+          if [ -f "/etc/init.d/asamanager" ]; then
+            sudo "/etc/init.d/asamanager" start "$instance"
+          elif [ -f "/etc/rc.d/init.d/asamanager" ]; then
+            sudo "/etc/rc.d/init.d/asamanager" start "$instance"
           fi
         elif [ -n "$use_upstart" ]; then
-          sudo start arkmanager "service=$instance"
+          sudo start asamanager "service=$instance"
         else
           doStart --noautoupdate
         fi
       fi
     fi
   fi
+}
+
+#
+# Check if any mod update is available
+#
+checkForModUpdate(){
+  local updateavail=
+  local modname=
+  local steamworkshopdir="$(getSteamWorkshopDir)"
+  local cancheckmodavail=1
+  local modmissing=
+  local revstatcode=
+  local alluptodate=1
+
+  if [[ " $* " =~ " --revstatus " ]]; then
+    revstatcode=1
+  fi
+
+  if [[ " $* " =~ " --skip-workshop-dir " ]]; then
+    cancheckmodavail=
+  else
+    if [ ! -d "${steamworkshopdir}" ]; then
+      echo "Error: ${steamworkshopdir} does not exist"
+      if [ -n "$revstatcode" ]; then return 4; else return 0; fi
+    fi
+
+    if [ ! -f "${steamworkshopdir}/appworkshop_${mod_appid}.acf" ]; then
+      echo "Error: appworkshop_${mod_appid}.acf not found at ${steamworkshopdir}"
+      cancheckmodavail=
+    fi
+  fi
+
+  for modid in $(getModIds); do
+    availupd="$(getAvailModLastUpdated "$modid")"
+    instupd="$(getInstalledModLastUpdated "$modid")"
+    modname="$(getModName "$modid")"
+    if [ -z "$availupd" ]; then
+      printf "Mod %d doesn't exist in the steam workshop\n" "$modid"
+      modmissing=1
+    elif [ "$instupd" != "$availupd" ]; then
+      alluptodate=
+      if [ -n "$cancheckmodavail" ]; then
+        localupd="$(getLocalModLastUpdated "$modid")"
+        if [ -z "$localupd" ]; then
+          printf "Mod %d [%s] has not been downloaded\n" "$modid" "$modname"
+          updateavail=1
+        elif [ "$availupd" != "$localupd" ]; then
+          printf "Mod %d [%s] has been updated on the Steam workshop\n" "$modid" "$modname"
+          printf "Local last updated: %s\nSteam last updated: %s\n" "$(date --date="@$localupd")" "$(date --date="@$availupd")"
+          updateavail=1
+        fi
+      fi
+    fi
+    if [ ! -d "$arkserverroot/${arkserverdir}/Content/Mods/$modid" ]; then
+      printf "Mod %d [%s] is not installed\n" "$modid" "$modname"
+      updateavail=1
+    elif [ "$instupd" != "$availupd" ]; then
+      if isModUpdateNeeded "$modid"; then
+        printf "Mod %d [%s] update needs to be applied\n" "$modid" "$modname"
+        updateavail=1
+      elif [ -z "$cancheckmodavail" ]; then
+        printf "Mod %d [%s] update needs to be downloaded and applied\n" "$modid" "$modname"
+        updateavail=1
+      fi
+    fi
+  done
+
+  if [ -n "$updateavail" ]; then
+    echo "One or more updates are available"
+    if [ -n "$revstatcode" ]; then return 1; else return 0; fi
+  elif [ -n "$alluptodate" ]; then
+    echo "All mods are up to date"
+    if [ -n "$revstatcode" ]; then return 0; else return 1; fi
+  elif [ -z "$cancheckmodavail" ]; then
+    echo "Cannot check if mods are up to date"
+    if [ -n "$revstatcode" ]; then return 3; else return 0; fi
+  elif [ -n "$modmissing" ]; then
+    echo "One or more mods are unavailable"
+    return 2
+  else
+    echo "All mods are up to date"
+    if [ -n "$revstatcode" ]; then return 0; else return 1; fi
+  fi
+}
+
+#
+# Get the Mod IDs of the installed mods and the requested mods
+#
+getModIds(){
+  (
+    echo "${serverMapModId}"
+    echo "${ark_TotalConversionMod}"
+    echo "${ark_GameModIds}" | tr ',' '\n'
+    # shellcheck disable=SC2154
+    for v in "${!arkmod_@}"; do
+      if [ "${!v}" != "disabled" ]; then
+        echo "${v#arkmod_}"
+      fi
+    done
+    if [ -z "$ignoreInstalledMods" ]; then
+      find "${arkserverroot}/${arkserverdir}/Content/Mods" -maxdepth 1 -type d -printf "%P\n"
+    fi
+    getCollectionMods
+  ) | sort | uniq | grep '^[1-9][0-9]*$' | grep -v '^111111111$'
+}
+
+#
+# Get Mod IDs included in collections in rkModCollections
+#
+getCollectionMods(){
+  (
+    for m in ${arkModCollections//,/\ }; do
+      curl \
+          -s \
+          -d \
+          "collectioncount=1&publishedfileids[0]=${m}" \
+          "http://api.steampowered.com/ISteamRemoteStorage/GetCollectionDetails/v1" |
+          perl -e '
+              use JSON;
+              my $js = decode_json <>;
+              my $coll = ${$js}{response}{collectiondetails}[0];
+              if (exists ${$coll}{children}) {
+                  foreach my $mod (@{${$coll}{children}}) {
+                      print "${$mod}{publishedfileid}\n";
+                  }
+              } else {
+                  print "${$coll}{publishedfileid}\n";
+              }
+          ' 2>/dev/null
+    done
+  ) | sort | uniq | grep '^[1-9][0-9]*$'
+}
+
+#
+# Get the Mod details of the installed mods and the requested mods
+#
+listMods(){
+  local modlist
+  local modid moddir
+  declare -A modlist
+  if [ -n "${serverMapModId}" ]; then
+    modlist[${serverMapModId}]="serverMapModId"
+  fi
+  if [ -n "${ark_TotalConversionMod}" ]; then
+    modlist[${ark_TotalConversionMod}]="ark_TotalConversionMod"
+  fi
+  if [ -n "${ark_GameModIds}" ]; then
+    for modid in ${ark_GameModIds//,/ }; do
+      modlist[${modid}]="ark_GameModIds"
+    done
+  fi
+  for modid in "${!arkmod_@}"; do
+    if [ "${!modid}" != "disabled" ]; then
+      modlist[${modid#arkmod_}]="${modid}"
+    fi
+  done
+  if [ -z "$ignoreInstalledMods" ]; then
+    for moddir in "${arkserverroot}/${arkserverdir}/Content/Mods"/*; do
+      modid="${moddir##*/}"
+      if [[ "${modid}" =~ ^[1-9][0-9]*$ && "${modid}" != "111111111" ]]; then
+        modlist[${moddir##*/}]="Content/Mods"
+      fi
+    done
+  fi
+  for modid in "${!modlist[@]}"; do
+    printf "  %10d: %-20s %s\n" "$modid" "[${modlist[$modid]}]" "$(getModName $modid 2>/dev/null)"
+  done
+}
+
+#
+# Gets installed mod last update timestamp
+#
+getInstalledModLastUpdated(){
+  local modid="$1"
+  if [ ! -f "${arkserverroot}/${arkserverdir}/Content/Mods/${modid}.mod" ]; then return 0; fi
+  if [ -f "${arkserverroot}/${arkserverdir}/Content/Mods/${modid}/__modversion__.info" ]; then
+    cat "${arkserverroot}/${arkserverdir}/Content/Mods/${modid}/__modversion__.info"
+  else
+    stat -c "%Y" "${arkserverroot}/${arkserverdir}/Content/Mods/${modid}.mod"
+  fi
+}
+
+#
+# Gets local mod last update timestamp
+#
+getLocalModLastUpdated(){
+  local modid="$1"
+  local steamworkshopdir="$(getSteamWorkshopDir)"
+  if [ ! -f "${steamworkshopdir}/appworkshop_${mod_appid}.acf" ]; then return 0; fi
+  local instupd="$(sed -n '/^\t"WorkshopItemsInstalled"$/,/^\t[}]$/{/^\t\t"'"${modid}"'"$/,/^\t\t[}]$/{s|^\t\t\t"timeupdated"\t\t"\(.*\)"$|\1|p}}' <"${steamworkshopdir}/appworkshop_${mod_appid}.acf")"
+  echo "$instupd"
+}
+
+#
+# Gets available mod last update timestamp
+#
+getAvailModLastUpdated(){
+  local modid="$1"
+  local serverresp="$(curl -s -d "itemcount=1&publishedfileids[0]=${modid}" "http://api.steampowered.com/ISteamRemoteStorage/GetPublishedFileDetails/v1")"
+  local remupd=
+  if [[ "$serverresp" =~ \"time_updated\":[[:space:]]*([^,]*) ]]; then
+    remupd="${BASH_REMATCH[1]}"
+  fi
+  echo "$remupd"
+}
+
+#
+# Checks if a mod update is available before trying to download it
+isModUpdateAvailable(){
+  local modid="$1"
+  local remupd="$(getAvailModLastUpdated "$modid")"
+  local instupd="$(getInstalledModLastUpdated "$modid")"
+
+  if [[ -n "$remupd" && "$instupd" == "$remupd" ]]; then
+    return 1
+  fi
+
+  local steamworkshopdir="$(getSteamWorkshopDir)"
+  if [ ! -f "${steamworkshopdir}/appworkshop_${mod_appid}.acf" ]; then return 0; fi
+
+  local localupd="$(getLocalModLastUpdated "$modid")"
+  if [[ -n "${remupd}" && "${localupd}" != "${remupd}" ]]; then
+    return 0 # true
+  fi
+  return 1 # false
+}
+
+#
+# Downloads a mod from the Steam workshop
+#
+doDownloadMod(){
+  local modid=$1
+  local steamcmdroot="$steamcmdroot"
+  if [ -n "$arkflag_automanagedmods" ]; then
+    steamcmdroot="$arkserverroot/Engine/Binaries/ThirdParty/SteamCMD/Linux"
+  fi
+  doDownloadSteamCMD
+  local steamworkshopdir="$(getSteamWorkshopDir)"
+  local steamcmd_workshoplog="$(getSteamWorkshopLog)"
+  local modsrcdir="${steamworkshopdir}/content/$mod_appid/$modid"
+  local moddldir="${steamworkshopdir}/downloads/$mod_appid"
+  cd "$steamcmdroot"
+  retries=10
+
+  # Bypass the 111111111 modid used by Primitive+
+  if [ "$modid" = "111111111" ]; then
+    return 0
+  fi
+
+  while true; do
+    echo -n "Downloading mod $modid"
+    local output
+    output=$(runSteamCMDspinnerSubst 5 +workshop_download_item "$mod_appid" "$modid")
+    result=$?
+    if [ $result -eq 0 ]; then
+      modsrcdir="$(echo "$output" | sed -n 's@^Success. Downloaded item [0-9][0-9]* to "\([^"]*\)" .*@\1@p')"
+      break
+    elif [ $result -eq 5 ]; then
+      echo "User ${steamlogin:-anonymous} login failed - please login to steamcmd manually"
+      return 1
+    else
+      echo
+      failedmod="$(tail -n 20 "${steamcmd_workshoplog}" | sed -n 's|.* Download item \([0-9]*\) result : \(.*\)|\1\t\2|p' | grep -v $'\tOK' | tail -n1 | cut -f1)"
+      if [[ -n "$failedmod" && "$failedmod" != "$modid" ]]; then
+        echo "Mod $failedmod prevented mod update - removing failed mod"
+        doRemoveMods "$failedmod"
+      elif [ ! -d "$moddldir" ]; then
+        echo "Mod $modid download failed"
+        break
+      fi
+      (( retries = retries - 1 ))
+      if (( retries <= 0 )); then
+        echo "Retries exhausted"
+      fi
+      echo "Mod $modid not fully downloaded - retrying"
+    fi
+  done 5> >(cat)
+
+  if [ -f "$modsrcdir/mod.info" ]; then
+    echo "Mod $modid downloaded"
+    modsrcdirs[$modid]="$modsrcdir"
+    return 0
+  else
+    echo "Mod $modid was not successfully downloaded"
+    return 1
+  fi
+}
+
+#
+# Downloads all installed and requested mods from the Steam workshop
+#
+doDownloadAllMods(){
+  local fail=0
+  local success=0
+  for modid in $(getModIds); do
+    if isModUpdateAvailable "$modid"; then
+      if doDownloadMod "$modid"; then
+        success=1
+      else
+        fail=1
+      fi
+    fi
+  done
+  [[ $success == 1 || $fail == 0 ]] && return 0 || return 1
+}
+
+#
+# Checks if the files a mod owns need to be updated
+#
+isModUpdateNeeded(){
+  local modid=$1
+  local steamworkshopdir="$(getSteamWorkshopDir)"
+  local modsrcdir="${steamworkshopdir}/content/$mod_appid/$modid"
+  local moddestdir="$arkserverroot/${arkserverdir}/Content/Mods/$modid"
+  local modbranch="${mod_branch:-Windows}"
+
+  # Bypass the 111111111 modid used by Primitive+
+  if [ "$modid" = "111111111" ]; then
+    return 1
+  fi
+
+  if [ -n "${modsrcdirs[$modid]}" ]; then
+    modsrcdir="${modsrcdirs[$modid]}"
+  fi
+
+  # shellcheck disable=SC2154
+  for varname in "${!mod_branch_@}"; do
+    if [ "mod_branch_$modid" == "$varname" ]; then
+      modbranch="${!varname}"
+    fi
+  done
+
+  if [ -f "$moddestdir/.modbranch" ]; then
+    mv "$moddestdir/.modbranch" "$moddestdir/__asamanager_modbranch__.info"
+  fi
+
+  if [ ! -f "$moddestdir/__asamanager_modbranch__.info" ] || [ "$(<"$moddestdir/__asamanager_modbranch__.info")" != "$modbranch" ]; then
+    return 0
+  fi
+
+  if [ -f "$modsrcdir/mod.info" ]; then
+    if [ -f "$modsrcdir/${modbranch}NoEditor/mod.info" ]; then
+      modsrcdir="$modsrcdir/${modbranch}NoEditor"
+    fi
+
+    while read -r f; do
+      if [ ! -f "$moddestdir/${f%.z}" ] || [ "$modsrcdir/$f" -nt "$moddestdir/${f%.z}" ]; then
+        return 0
+      fi
+    done < <(find "$modsrcdir" -type f ! -name "*.z.uncompressed_size" -printf "%P\n")
+  fi
+
+  return 1
+}
+
+#
+# Get the name of the specified mod
+#
+getModName(){
+  local modid=$1
+  local steamworkshopdir="$(getSteamWorkshopDir)"
+  local modsrcdir="${steamworkshopdir}/content/$mod_appid/$modid"
+
+  if [ -n "${modsrcdirs[$modid]}" ]; then
+    modsrcdir="${modsrcdirs[$modid]}"
+  fi
+
+  modname="$(curl -s "https://steamcommunity.com/sharedfiles/filedetails/?id=${modid}" | sed -n 's|^.*<div class="workshopItemTitle">\([^<]*\)</div>.*|\1|p')"
+
+  if [ -n "$modname" ]; then
+    echo "$modname"
+  else
+    perl -e '
+      my $data;
+      { local $/; $data = <STDIN>; }
+      my $mapnamelen = unpack("@0 L<", $data);
+      my $mapname = substr($data, 4, $mapnamelen - 1);
+      print $mapname
+    ' <"${modsrcdir}/mod.info"
+  fi
+}
+
+#
+# Checks if any installed or requested mods need to be updated
+#
+isAnyModUpdateNeeded(){
+  modnamesupdated=""
+  local ismodupdateneeded=1
+  for modid in $(getModIds); do
+    if isModUpdateNeeded "$modid"; then
+      ismodupdateneeded=0
+      if [ -n "$modnamesupdated" ]; then
+        modnamesupdated="${modnamesupdated}, "
+      fi
+      modnamesupdated="${modnamesupdated}$(getModName "$modid")"
+    fi
+  done
+
+  return $ismodupdateneeded
+}
+
+#
+# Extracts a mod into the ASA Mods directory
+#
+doExtractMod(){
+  local modid=$1
+  local steamworkshopdir="$(getSteamWorkshopDir)"
+  local modsrcdir="${steamworkshopdir}/content/$mod_appid/$modid"
+  local moddestdir="$arkserverroot/${arkserverdir}/Content/Mods/$modid"
+  local modextractdir="$moddestdir"
+  local modbranch="${mod_branch:-Windows}"
+
+  if [[ -n "$arkStagingDir" && -d "$arkStagingDir" ]]; then
+    modextractdir="$arkStagingDir/Mods/$modid"
+  fi
+
+  # Bypass the 111111111 modid used by Primitive+
+  if [ "$modid" = "111111111" ]; then
+    return 0
+  fi
+
+  if [ -n "${modsrcdirs[$modid]}" ]; then
+    modsrcdir="${modsrcdirs[$modid]}"
+  fi
+
+  for varname in "${!mod_branch_@}"; do
+    if [ "mod_branch_$modid" == "$varname" ]; then
+      modbranch="${!varname}"
+    fi
+  done
+
+  if [ -f "$modextractdir/.modbranch" ]; then
+    mv "$modextractdir/.modbranch" "$modextractdir/__asamanager_modbranch__.info"
+  fi
+
+  if [ ! -f "$modextractdir/__asamanager_modbranch__.info" ] || [ "$(<"$modextractdir/__asamanager_modbranch__.info")" != "$modbranch" ]; then
+    rm -rf "$modextractdir"
+  fi
+
+  if [ -f "$modsrcdir/mod.info" ]; then
+    local modupdatetime="$(getLocalModLastUpdated "$modid")"
+
+    echo "Copying files to $modextractdir"
+
+    if [ -f "$modsrcdir/${modbranch}NoEditor/mod.info" ]; then
+      modsrcdir="$modsrcdir/${modbranch}NoEditor"
+    fi
+
+    find "$modsrcdir" -type d -printf "$modextractdir/%P\0" | xargs -0 -r mkdir -p
+
+    find "$modextractdir" -type f ! -name '.*' -printf "%P\n" | while read -r f; do
+      if [ ! -f "$modsrcdir/$f" ] && [ ! -f "$modsrcdir/${f}.z" ]; then
+        rm "$modextractdir/$f"
+      fi
+    done
+
+    find "$modextractdir" -depth -type d -printf "%P\n" | while read -r d; do
+      if [ ! -d "$modsrcdir/$d" ]; then
+        rmdir "$modextractdir/$d"
+      fi
+    done
+
+    find "$modsrcdir" -type f ! \( -name '*.z' -or -name '*.z.uncompressed_size' \) -printf "%P\n" | while read -r f; do
+      if [ ! -f "$modextractdir/$f" ] || [ "$modsrcdir/$f" -nt "$modextractdir/$f" ]; then
+        printf "%10d  %s  " "$(stat -c '%s' "$modsrcdir/$f")" "$f"
+        if [[ -n "$useRefLinks" && "$(stat -c "%d" "$modsrcdir")" == "$(stat -c "%d" "$modextractdir")" ]]; then
+          cp --reflink=auto "$modsrcdir/$f" "$modextractdir/$f"
+        else
+          cp "$modsrcdir/$f" "$modextractdir/$f"
+        fi
+        echo -ne "\r\\033[K"
+      fi
+    done
+
+    find "$modsrcdir" -type f -name '*.z' -printf "%P\n" | while read -r f; do
+      if [ ! -f "$modextractdir/${f%.z}" ] || [ "$modsrcdir/$f" -nt "$modextractdir/${f%.z}" ]; then
+        printf "%10d  %s  " "$(stat -c '%s' "$modsrcdir/$f")" "${f%.z}"
+        perl -M'Compress::Raw::Zlib' -e '
+          my $sig;
+          read(STDIN, $sig, 8) or die "Unable to read compressed file: $!";
+          if ($sig != "\xC1\x83\x2A\x9E\x00\x00\x00\x00"){
+            die "Bad file magic";
+          }
+          my $data;
+          read(STDIN, $data, 24) or die "Unable to read compressed file: $!";
+          my ($chunksizelo, $chunksizehi,
+              $comprtotlo,  $comprtothi,
+              $uncomtotlo,  $uncomtothi)  = unpack("(LLLLLL)<", $data);
+          my @chunks = ();
+          my $comprused = 0;
+          while ($comprused < $comprtotlo) {
+            read(STDIN, $data, 16) or die "Unable to read compressed file: $!";
+            my ($comprsizelo, $comprsizehi,
+                $uncomsizelo, $uncomsizehi) = unpack("(LLLL)<", $data);
+            push @chunks, $comprsizelo;
+            $comprused += $comprsizelo;
+          }
+          foreach my $comprsize (@chunks) {
+            read(STDIN, $data, $comprsize) or die "File read failed: $!";
+            my ($inflate, $status) = new Compress::Raw::Zlib::Inflate();
+            my $output;
+            $status = $inflate->inflate($data, $output, 1);
+            if ($status != Z_STREAM_END) {
+              die "Bad compressed stream; status: " . ($status);
+            }
+            if (length($data) != 0) {
+              die "Unconsumed data in input"
+            }
+            print $output;
+          }
+        ' <"$modsrcdir/$f" >"$modextractdir/${f%.z}"
+        touch -c -r "$modsrcdir/$f" "$modextractdir/${f%.z}"
+        echo -ne "\r\\033[K"
+      fi
+    done
+
+    modname="$(curl -s "http://steamcommunity.com/sharedfiles/filedetails/?id=${modid}" | sed -n 's|^.*<div class="workshopItemTitle">\([^<]*\)</div>.*|\1|p')"
+
+    if [ -f "${modextractdir}/.mod" ]; then
+      rm "${modextractdir}/.mod"
+    fi
+
+    perl -e '
+      my $data;
+      { local $/; $data = <STDIN>; }
+      my $mapnamelen = unpack("@0 L<", $data);
+      my $mapname = substr($data, 4, $mapnamelen - 1);
+      my $nummaps = unpack("@" . ($mapnamelen + 4) . " L<", $data);
+      my $pos = $mapnamelen + 8;
+      my $modname = ($ARGV[2] || $mapname) . "\x00";
+      my $modnamelen = length($modname);
+      my $modpath = "../../../" . $ARGV[0] . "/Content/Mods/" . $ARGV[1] . "\x00";
+      my $modpathlen = length($modpath);
+      print pack("L< L< L< Z$modnamelen L< Z$modpathlen L<",
+        $ARGV[1], 0, $modnamelen, $modname, $modpathlen, $modpath,
+        $nummaps);
+      for (my $mapnum = 0; $mapnum < $nummaps; $mapnum++){
+        my $mapfilelen = unpack("@" . ($pos) . " L<", $data);
+        my $mapfile = substr($data, $mapnamelen + 12, $mapfilelen);
+        print pack("L< Z$mapfilelen", $mapfilelen, $mapfile);
+        $pos = $pos + 4 + $mapfilelen;
+      }
+      print "\x33\xFF\x22\xFF\x02\x00\x00\x00\x01";
+    ' "$arkserverdir" "$modid" "$modname" <"$modextractdir/mod.info" >"${modextractdir}.mod"
+
+    if [ -f "$modextractdir/modmeta.info" ]; then
+      cat "$modextractdir/modmeta.info" >>"${modextractdir}.mod"
+    else
+      echo -ne '\x01\x00\x00\x00\x08\x00\x00\x00ModType\x00\x02\x00\x00\x001\x00' >>"${modextractdir}.mod"
+    fi
+
+    if [ -n "${modupdatetime}" ]; then
+      touch -c --date="@${modupdatetime}" -- "${modextractdir}.mod"
+      echo "${modupdatetime}" >"${modextractdir}/__modversion__.info"
+    fi
+
+    echo "$modbranch" >"$modextractdir/__asamanager_modbranch__.info"
+
+    if [[ "$modextractdir" != "$moddestdir" ]]; then
+      if [ ! -d "${moddestdir}" ]; then
+        mkdir -p "${moddestdir}"
+      fi
+      if [ "$(stat -c "%d" "$modextractdir")" == "$(stat -c "%d" "$moddestdir")" ]; then
+        if [ -n "$useRefLinks" ]; then
+          cp -au --reflink=always --remove-destination "${modextractdir}/." "${moddestdir}"
+        else
+          cp -alu --remove-destination "${modextractdir}/." "${moddestdir}"
+        fi
+      else
+        cp -au --remove-destination "${modextractdir}/." "${moddestdir}"
+      fi
+      find "${moddestdir}" -type f ! -name '.*' -printf "%P\n" | while read -r f; do
+        if [ ! -f "${modextractdir}/${f}" ]; then
+          rm "${moddestdir}/${f}"
+        fi
+      done
+      find "$modextractdir" -depth -type d -printf "%P\n" | while read -r d; do
+        if [ ! -d "$modsrcdir/$d" ]; then
+          rmdir "$modextractdir/$d"
+        fi
+      done
+      if [[ -n "$useRefLinks" && "$(stat -c "%d" "$modextractdir")" == "$(stat -c "%d" "$moddestdir")" ]]; then
+        cp -u --reflink=always "${modextractdir}.mod" "${moddestdir}.mod"
+      else
+        cp -u "${modextractdir}.mod" "${moddestdir}.mod"
+      fi
+    fi
+  fi
+}
+
+#
+# Downloads mod and installs it into mods directory
+#
+doInstallMod(){
+  local modid
+  local steamworkshopdir="$(getSteamWorkshopDir)"
+  for modid in ${1//,/ }; do
+    if [[ " $* " = *" --validate "* ]]; then
+      if [ -f "${steamworkshopdir}/appworkshop_${mod_appid}.acf" ]; then
+        sed -i "/^\\t\\t\"${modid}\"/,/^\\t\\t}/d" "${steamworkshopdir}/appworkshop_${mod_appid}.acf"
+      fi
+    fi
+
+    if doDownloadMod "$modid"; then
+      doExtractMod "$modid"
+      echo "Mod $modid installed"
+    fi
+  done
+}
+
+#
+# Downloads and installs all requested mods
+#
+doInstallAllMods(){
+  for modid in $(getModIds); do
+    doInstallMod "$modid" "$@"
+  done
+}
+
+#
+# Removes all mods from the mods directory
+#
+doUninstallAllMods(){
+  for modid in $(getModIds); do
+    if [[ "$modid" != "111111111" && "$modid" != "TheCenter" ]]; then
+      doUninstallMod "$modid"
+    fi
+  done
+}
+
+#
+# Removes mod from mods directory
+#
+doUninstallMod(){
+  local modid
+  for modid in ${1//,/ }; do
+    local moddir="$arkserverroot/${arkserverdir}/Content/Mods/$modid"
+    local modfile="$arkserverroot/${arkserverdir}/Content/Mods/${modid}.mod"
+    if [ -d "${moddir}" ]; then
+      rm -rf "${moddir}"
+    fi
+    if [ -f "${modfile}" ]; then
+      rm -f "$modfile"
+    fi
+  done
+}
+
+#
+# Enables a mod in the config
+#
+doEnableMod(){
+  local modid="${1%=*}"
+  local modtype="${1#*=}"
+  if [ "$modtype" = "$1" ]; then
+    modtype=game
+  fi
+  local modvar="arkmod_${modid}"
+  if [ -n "${!modvar}" ]; then
+    sed -i "s|^\(${modvar}\)=[^ ]*|\1=${modtype}|" "$configfile"
+  else
+    echo "${modvar}=${modtype}" >>"$configfile"
+  fi
+}
+
+#
+# Disable a mod in the config
+#
+doDisableMod(){
+  local modid="$1"
+  local modvar="arkmod_$modid"
+  if [[ "$ark_GameModIds" = *"$modid"* ]]; then
+    sed -i "s|^\(ark_GameModIds=\(\|[\"']\)\(\|[^\"' ]*,\)\)${modid},*|\1|" "$configfile"
+  fi
+  if [ -n "$modvar" ]; then
+    sed -i "s|^\(arkmod_${modid}\)=[^ ]*|\1=disabled|" "$configfile"
+  fi
+}
+
+#
+# Removes mod from steamcmd workshop directory
+#
+doRemoveMods(){
+  local modid
+  local steamworkshopdir="$(getSteamWorkshopDir)"
+  for modid in ${1//,/ }; do
+    if [ -f "${steamworkshopdir}/appworkshop_${mod_appid}.acf" ]; then
+      sed -i "/^\\t\\t\"${modid}\"/,/^\\t\\t}/d" "${steamworkshopdir}/appworkshop_${mod_appid}.acf"
+    fi
+
+    if [ -d "${steamworkshopdir}/content/${mod_appid}/${modid}" ]; then
+      rm -rf "${steamworkshopdir}/content/${mod_appid}/${modid}"
+    fi
+
+    if [ -d "${steamworkshopdir}/downloads/${mod_appid}/${modid}" ]; then
+      rm -rf "${steamworkshopdir}/downloads/${mod_appid}/${modid}"
+    fi
+  done
 }
 
 #
@@ -2368,7 +3114,7 @@ doBackup(){
       --no-cluster) backupCluster=false; ;;
       *)
         echo "Unrecognized option $arg"
-        echo "Try 'arkmanager -h' or 'arkmanager --help' for more information."
+        echo "Try 'asamanager -h' or 'asamanager --help' for more information."
         exit 1
     esac
   done
@@ -2379,8 +3125,8 @@ doBackup(){
 
   echo -e "${NORMAL} Saved arks directory is ${savedir}"
 
-  # ARK server uses Write-Unlink-Rename
-  echo -ne "${NORMAL} Copying ARK world file (${mapname}) "
+  # ASA server uses Write-Unlink-Rename
+  echo -ne "${NORMAL} Copying ASA world file (${mapname}) "
 
   local mapfile="${savedir}/${mapname}.ark"
 
@@ -2406,7 +3152,7 @@ doBackup(){
         logprint "Candidates:"
         for f in "${savedir}"/*.ark; do
           if [ "${f}" == "${f%_??.??.????_??.??.??.ark}" ]; then # Exclude auto-backups
-            logprint "  Saved ARK ${f}"
+            logprint "  Saved ASA ${f}"
           fi
         done
       fi
@@ -2417,7 +3163,7 @@ doBackup(){
 
   # Copy other world files
   if [ -n "$backupAllMaps" ] && [ "$backupAllMaps" != "false" ]; then
-    echo -e "${NORMAL} Copying other ARK world files"
+    echo -e "${NORMAL} Copying other ASA world files"
     for f in "${savedir}/"*.ark; do
       if [[ "${f}" != "${mapfile}" && "${f}" != "${savedir}/"*_??.??.????_??.??.??.ark ]]; then
         cp -p "${f}" "${backupdir}/${f##*/}"
@@ -2427,7 +3173,7 @@ doBackup(){
 
   # Copy map autobackups
   if [ -n "$includeAutoBackups" ] && [ "$includeAutoBackups" != "false" ]; then
-    echo -e "${NORMAL} Copying all ARK world autobackup files"
+    echo -e "${NORMAL} Copying all ASA world autobackup files"
     for f in "${savedir}/"*.ark; do
       if [[ "${f}" == "${savedir}/"*_??.??.????_??.??.??.ark ]]; then
         cp -p "${f}" "${backupdir}/${f##*/}"
@@ -2435,11 +3181,11 @@ doBackup(){
     done
   fi
 
-  # ARK server uses Lock-Truncate-Write-Unlock
+  # ASA server uses Lock-Truncate-Write-Unlock
   # Unfortunately we can't lock the file, as
-  # ARK server uses a non-blocking lock and will
+  # ASA server uses a non-blocking lock and will
   # fail to update the file if the lock fails.
-  echo -e "${NORMAL} Copying ARK profile files"
+  echo -e "${NORMAL} Copying ASA profile files"
   for f in "${savedir}/"*.arkprofile; do
     if [ -f "${f}" ]; then
       echo -ne "${NORMAL}   ${f##*/} "
@@ -2461,8 +3207,8 @@ doBackup(){
     fi
   done
 
-  # ARK server uses Lock-Truncate-Write-Unlock
-  echo -e "${NORMAL} Copying ARK tribe files "
+  # ASA server uses Lock-Truncate-Write-Unlock
+  echo -e "${NORMAL} Copying ASA tribe files "
   for f in "${savedir}/"*.arktribe; do
     if [ -f "${f}" ]; then
       echo -ne "${NORMAL}   ${f##*/} "
@@ -2484,8 +3230,8 @@ doBackup(){
     fi
   done
 
-  # ARK server uses Lock-Truncate-Write-Unlock
-  echo -e "${NORMAL} Copying ARK tribute tribe files "
+  # ASA server uses Lock-Truncate-Write-Unlock
+  echo -e "${NORMAL} Copying ASA tribute tribe files "
   for f in "${savedir}/"*.arktributetribe; do
     if [ -f "${f}" ]; then
       echo -ne "${NORMAL}   ${f##*/} "
@@ -2517,7 +3263,7 @@ doBackup(){
     cp -av "${clusterdir}" "${backupdir}/Cluster"
   fi
 
-  # ARK server uses Lock-Truncate-Write-Unlock
+  # ASA server uses Lock-Truncate-Write-Unlock
   echo -ne "${NORMAL} Copying GameUserSettings.ini "
   cp -p "${savedcfgdir}/GameUserSettings.ini" "${backupdir}/GameUserSettings.ini"
   if [ ! -s "${backupdir}/GameUserSettings.ini" ]; then
@@ -2651,7 +3397,7 @@ doInstallCronJob(){
   cmdargs=""
   instargs=""
   output=">/dev/null 2>&1"
-  arkmanagerpath="${0}"
+  asamanagerpath="${0}"
   command="$1"
   shift
 
@@ -2691,10 +3437,10 @@ doInstallCronJob(){
     done
   fi
 
-  cronjob="${minute} ${hour} * * * ${arkmanagerpath} --cronjob ${command} ${instargs} ${cmdopts} --args ${cmdargs} -- ${output}"
+  cronjob="${minute} ${hour} * * * ${asamanagerpath} --cronjob ${command} ${instargs} ${cmdopts} --args ${cmdargs} -- ${output}"
 
   (crontab -l | \
-    sed -e "\\# [*] [*] [*] ${arkmanagerpath} --cronjob ${command} ${instargs} #d";
+    sed -e "\\# [*] [*] [*] ${asamanagerpath} --cronjob ${command} ${instargs} #d";
     echo "${cronjob}" ) | \
     crontab -
 }
@@ -2703,11 +3449,11 @@ doInstallCronJob(){
 # Removes an installed cron job
 #
 doRemoveCronJob(){
-  arkmanagerpath="${0}"
+  asamanagerpath="${0}"
   command="$1"
 
   crontab -l | \
-    sed -e "\\# [*] [*] [*] ${arkmanagerpath} --cronjob ${command} @${instance} #d" | \
+    sed -e "\\# [*] [*] [*] ${asamanagerpath} --cronjob ${command} @${instance} #d" | \
     crontab -
 }
 
@@ -2817,7 +3563,7 @@ doWait(){
   fi
 
   for instance in "${instances[@]}"; do
-    pidfile="$(useConfig "$instance"; echo "${arkserverroot}/${arkmanagerpidfile}")"
+    pidfile="$(useConfig "$instance"; echo "${arkserverroot}/${asamanagerpidfile}")"
     pidfiles[$instance]="$pidfile"
   done
 
@@ -2893,7 +3639,7 @@ getAllInstanceNames(){
       fi
     done 3<"${arkstGlobalCfgFile}"
   fi
-  for f in "${HOME}"/.config/arkmanager/instances/*.cfg; do
+  for f in "${HOME}"/.config/asamanager/instances/*.cfg; do
     if [ -f "${f}" ]; then
       instancename="${f##*/}"
       instancename="${instancename%.cfg}"
@@ -2903,7 +3649,7 @@ getAllInstanceNames(){
       fi
     fi
   done
-  for f in /etc/arkmanager/instances/*.cfg; do
+  for f in /etc/asamanager/instances/*.cfg; do
     if [ -f "${f}" ]; then
       instancename="${f##*/}"
       instancename="${instancename%.cfg}"
@@ -2939,7 +3685,7 @@ doPrintConfig(){
   for cfgfile in "$configfile" "${HOME}/${arkstUserCfgFile}" "${arkstGlobalCfgFile}"; do
     if [ -r "$cfgfile" ]; then
       while read -r v; do
-        # shellcheck source=arkmanager.cfg.shellcheck
+        # shellcheck source=asamanager.cfg.shellcheck
         val="$(source "$cfgfile"; echo "${!v}")"
         if [[ "$val" = "${vals[$v]}" && -z "${vars[$v]}" ]]; then
           vars["$v"]="$cfgfile"
@@ -2953,17 +3699,17 @@ doPrintConfig(){
 doTestConfig(){
   set -e
   if [ -r "${arkstGlobalCfgFile}" ]; then
-      # shellcheck source=arkmanager.cfg.shellcheck
+      # shellcheck source=asamanager.cfg.shellcheck
       source "${arkstGlobalCfgFile}"
   fi
 
   if [ -r "${HOME}/${arkstUserCfgFile}" ]; then
-      # shellcheck source=arkmanager.cfg.shellcheck
+      # shellcheck source=asamanager.cfg.shellcheck
       source "${HOME}/${arkstUserCfgFile}"
   fi
 
   if [ -r "$configfile" ]; then
-      # shellcheck source=arkmanager.cfg.shellcheck
+      # shellcheck source=asamanager.cfg.shellcheck
       source "$configfile"
   fi
 
@@ -2972,17 +3718,18 @@ doTestConfig(){
   test -n "$arkserverroot" -a -d "$arkserverroot" -a -r "$arkserverroot"
   test -n "$arkserverexec" -a -x "$arkserverroot/$arkserverexec"
   test -n "$savedarksdir" -a -d "$savedarksdir" -a -w "$savedarksdir"
+  test "$mod_branch" = "Linux" -a -z "$nowarnmodbranch"
   test -n "$logdir" -a -d "$logdir" -a -w "$logdir"
   set +e
 }
 
 useConfig() {
   configfile=
-  if [ -f "/etc/arkmanager/instances/${1}.cfg" ]; then
-    configfile="/etc/arkmanager/instances/${1}.cfg"
+  if [ -f "/etc/asamanager/instances/${1}.cfg" ]; then
+    configfile="/etc/asamanager/instances/${1}.cfg"
   fi
-  if [[ -f "${HOME}/.config/arkmanager/instances/${1}.cfg" && "${HOME}/.config/arkmanager/instances/${1}.cfg" -nt "/etc/arkmanager/instances/${1}.cfg" ]]; then
-    configfile="${HOME}/.config/arkmanager/instances/${1}.cfg"
+  if [[ -f "${HOME}/.config/asamanager/instances/${1}.cfg" && "${HOME}/.config/asamanager/instances/${1}.cfg" -nt "/etc/asamanager/instances/${1}.cfg" ]]; then
+    configfile="${HOME}/.config/asamanager/instances/${1}.cfg"
   fi
   for varname in "${!configfile_@}"; do
     if [ "configfile_$1" == "$varname" ]; then
@@ -3005,7 +3752,7 @@ useConfig() {
       echo "Error: config file $configfile does not exist"
       exit 1
     fi
-    # shellcheck source=arkmanager.cfg.shellcheck
+    # shellcheck source=asamanager.cfg.shellcheck
     source "$configfile"
   fi
   if [ -z "$arkserverroot" ]; then
@@ -3017,7 +3764,7 @@ useConfig() {
   arkoldautorestartfile="${arkserverdir}/Saved/.autorestart"
   arkserverpidfile="${arkserverpidfile:-${arkserverdir}/Saved/.arkserver-${1}.pid}"
   arkserveroldpidfile="${arkserverdir}/Saved/.arkserver.pid"
-  arkmanagerpidfile="${arkmanagerpidfile:-${arkserverdir}/Saved/.arkmanager-${1}.pid}"
+  asamanagerpidfile="${asamanagerpidfile:-${arkserverdir}/Saved/.asamanager-${1}.pid}"
   arkwarnlockfile="${arkwarnlockfile:-${arkserverdir}/Saved/.ark-warn-${1}.lock}"
   # This is linked to the directory, not to the instance
   arkupdatelockfile="${arkupdatelockfile:-${arkserverdir}/Saved/.ark-update.lock}"
@@ -3049,91 +3796,103 @@ addArkOpt() {
 }
 
 showUsage() {
-  echo -e "Usage: arkmanager [Commands]\n"
+  echo -e "Usage: asamanager [Commands]\n"
   cat <<-EOE
-        Commands can be followed by one or more @instance arguments
-        The special '@all' instance selects all instances
-        Commands may also be followed by zero or more --options
+	Commands can be followed by one or more @instance arguments
+	The special '@all' instance selects all instances
+	Commands may also be followed by zero or more --options
 
-        Commands that take no instances:
-        Command               Description
-        upgrade-tools         Check for a new ARK Server Tools version and upgrades it if needed
-        uninstall-tools       Uninstall the ARK Server Tools
-        useconfig <name>      Sets the default instance for the commands that follow
-        list-instances        Lists all available instances
-        --help                Show this help
-        --version             Show the version info of ARK Server Tools
+	Commands that take no instances:
+	Command               Description
+	upgrade-tools         Check for a new ASA Server Tools version and upgrades it if needed
+	uninstall-tools       Uninstall the ASA Server Tools
+	useconfig <name>      Sets the default instance for the commands that follow
+	remove-mods <modid>   Remove one or more mods from the steamcmd workshop directory
+	list-instances        Lists all available instances
+	--help                Show this help
+	--version             Show the version info of ASA Server Tools
 
-        Commands that take one or more instances:
-        Command               Description
-        backup                Saves a backup of your server inside the backup directory
-        restore <filepath>    Restore a Backup, If no file is specified, the latest backup is used
-        broadcast <msg>       Sends a message to all users connected to server
-        saveworld             Saves the game world to disk
-        rconcmd <cmd>         Execute RCON command on server
-        checkupdate           Check for a new ARK server version
-        checkmodupdate        Checks for any mods needing updates
-        install               Install the ARK server files from steamcmd      
-        install-cronjob <cmd> Adds a cron job using the specified command
-        remove-cronjob <cmd>  Removes a cron job that used the specified command
-        restart               Stops the server and then starts it
-        run                   Runs the server without daemonizing
-        start                 Starts the server
-        stop                  Stops the server
+	Commands that take one or more instances:
+	Command               Description
+	backup                Saves a backup of your server inside the backup directory
+	restore <filepath>    Restore a Backup, If no file is specified, the latest backup is used
+	broadcast <msg>       Sends a message to all users connected to server
+	saveworld             Saves the game world to disk
+	rconcmd <cmd>         Execute RCON command on server
+	checkupdate           Check for a new ASA server version
+	checkmodupdate        Checks for any mods needing updates
+	install               Install the ASA server files from steamcmd
+	installmod <modid>    Installs a mod from the Steam workshop
+	uninstallmod <modid>  Removes the mod from the Mods directory
+	reinstallmod <modid>  Removes and re-installs a mod in the Mods directory
+	enablemod <modid>     Enables a mod in the config
+	disablemod <modid>    Disables a mod in the config
+	installmods           Installs all enabled mods
+	uninstallmods         Removes all installed mods from the Mods directory
+	install-cronjob <cmd> Adds a cron job using the specified command
+	remove-cronjob <cmd>  Removes a cron job that used the specified command
+	restart               Stops the server and then starts it
+	run                   Runs the server without daemonizing
+	start                 Starts the server
+	stop                  Stops the server
   kill                  kills the server
-        cancelshutdown        Aborts a running stop --warn or update --warn
-        status                Returns the status of the current ARK server instance
-        printconfig           Displays which settings are sourced from which config file
-        getpid                Gets the running server PID
-        update                Check for a new ARK server version, if needed, stops the server, updates it, and starts it again
+	cancelshutdown        Aborts a running stop --warn or update --warn
+	status                Returns the status of the current ASA server instance
+	printconfig           Displays which settings are sourced from which config file
+	getpid                Gets the running server PID
+	update                Check for a new ASA server version, if needed, stops the server, updates it, and starts it again
 
-        Commands which invoke steamcmd take the following options:
-           --verbose          Show steamcmd output
-           --spinner          Use a spinner for progress (default)
-           --dots             Use dots for progress
+	Commands which invoke steamcmd take the following options:
+	   --verbose          Show steamcmd output
+	   --spinner          Use a spinner for progress (default)
+	   --dots             Use dots for progress
 
-        Update command takes the following options:
-           --force            Apply update without checking the current version
-           --safe             Wait for server to perform world save and update (deprecated, use --saveworld)
-           --warn             Warn players before updating server
-           --ifempty          Apply the update only if no players are connected
-           --validate         Validates all ARK server files
-           --saveworld        Saves world before update
-           --backup           Takes a backup of the save files before updating
-           --downloadonly     Download server update without applying it
-                              Requires arkStagingDir be set to a staging directory on the same filesystem as the server
-           --no-download      Applies an already downloaded update from the staging directory
-           --systemd          Use the SystemD arkmanager@instance.service to restart the server
-           --service          Use the sysv-init arkmanager service to restart the server
-           --upstart          Use the Upstart arkmanager service to restart the server
-           --no-autostart     Don't start the server after updating
-           --warnreason=...   Specify an update reason other than the default
-           --beta=...         Specify a beta to install (use --beta=public to reset)
+	Update command takes the following options:
+	   --force            Apply update without checking the current version
+	   --safe             Wait for server to perform world save and update (deprecated, use --saveworld)
+	   --warn             Warn players before updating server
+	   --ifempty          Apply the update only if no players are connected
+	   --validate         Validates all ASA server files
+	   --saveworld        Saves world before update
+	   --update-mods      Updates installed and requested mods
+	   --backup           Takes a backup of the save files before updating
+	   --downloadonly     Download the mod and/or server update without applying it
+	                      Requires arkStagingDir be set to a staging directory on the same filesystem as the server
+	   --no-download      Applies an already downloaded update from the staging directory
+	   --systemd          Use the SystemD asamanager@instance.service to restart the server
+	   --service          Use the sysv-init asamanager service to restart the server
+	   --upstart          Use the Upstart asamanager service to restart the server
+	   --no-autostart     Don't start the server after updating
+	   --warnreason=...   Specify an update reason other than the default
+	   --beta=...         Specify a beta to install (use --beta=public to reset)
 
-        Stop and restart commands take the following options:
-           --saveworld        Saves world before shutdown
-           --warn             Warn players before stopping server
-           --warnreason=...   Specify a shutdown reason other than the default
+	Stop and restart commands take the following options:
+	   --saveworld        Saves world before shutdown
+	   --warn             Warn players before stopping server
+	   --warnreason=...   Specify a shutdown reason other than the default
 
-        Start and restart commands take the following options:
-           --noautoupdate     Disable any automatic update that may be enabled in the config
-           --alwaysrestart    Always restart server on crash, even if it did not finish starting
-           --no-background    Run the server without going into the background
-           --arkopt,opt=val   Add an ARK option:
-              -opt=val        Equivalent to adding arkopt_opt=val to config for this run
-              -opt            Equivalent to adding arkflag_opt=true to config for this run
-              opt=val         Equivalent to adding ark_opt=val to config for this run
+	Start and restart commands take the following options:
+	   --noautoupdate     Disable any automatic update that may be enabled in the config
+	   --alwaysrestart    Always restart server on crash, even if it did not finish starting
+	   --no-background    Run the server without going into the background
+	   --arkopt,opt=val   Add an ASA option:
+	      -opt=val        Equivalent to adding arkopt_opt=val to config for this run
+	      -opt            Equivalent to adding arkflag_opt=true to config for this run
+	      opt=val         Equivalent to adding ark_opt=val to config for this run
 
-        install-cronjob command takes the following options:
-           --daily            Run once a day (default)
-           --hourly           Run once an hour
-           --hour=<hour>      Hour of the day to run command
-           --minute=<min>     Minute of the hour to run command
-           --enable-output    Don't redirect the output of the command
-           --arg=option       Option to pass to command
+        installmod command takes the following options:
+	   --validate         Forcibly re-download the mod from the steam workshop
 
-        list-instances command takes the following options:
-           --brief            Only list instance names
+	install-cronjob command takes the following options:
+	   --daily            Run once a day (default)
+	   --hourly           Run once an hour
+	   --hour=<hour>      Hour of the day to run command
+	   --minute=<min>     Minute of the hour to run command
+	   --enable-output    Don't redirect the output of the command
+	   --arg=option       Option to pass to command
+
+	list-instances command takes the following options:
+	   --brief            Only list instance names
 EOE
 }
 
@@ -3143,12 +3902,12 @@ EOE
 
 main(){
   if [ -f "${arkstGlobalCfgFile}" ]; then
-      # shellcheck source=arkmanager.cfg.shellcheck
+      # shellcheck source=asamanager.cfg.shellcheck
       source "${arkstGlobalCfgFile}"
   fi
 
   if [ -f "${HOME}/${arkstUserCfgFile}" ]; then
-      # shellcheck source=arkmanager.cfg.shellcheck
+      # shellcheck source=asamanager.cfg.shellcheck
       source "${HOME}/${arkstUserCfgFile}"
   fi
 
@@ -3195,12 +3954,19 @@ main(){
 
     # get the number of arguments for commands that take arguments
     case "$command" in
+      login) nrarg=2; ;;
+      installmod) nrarg=1; ;;
+      uninstallmod) nrarg=1; ;;
+      reinstallmod) nrarg=1; ;;
+      enablemod) nrarg=1; ;;
+      disablemod) nrarg=1; ;;
       broadcast) nrarg=1; ;;
       rconcmd) nrarg=1; ;;
       notify) nrarg=1; ;;
       useconfig) nrarg=1; ;;
       install-cronjob) nrarg=1; ;;
       remove-cronjob) nrarg=1; ;;
+      remove-mods) nrarg=1; ;;
       restore) nrarg=1; ;;
     esac
 
@@ -3253,6 +4019,12 @@ main(){
         doUpgradeTools
         exit
       ;;
+      login)
+        steamlogin=${args[0]}
+        steampassword=${args[1]}
+        doLogin $steamlogin $steampassword
+        exit
+      ;;
       uninstall-tools)
         doUninstallTools
         exit
@@ -3260,6 +4032,14 @@ main(){
       useconfig)
         defaultinstance="${args[0]}"
         continue
+      ;;
+      remove-mods)
+        doRemoveMods "${args[0]}"
+        if [ $# -eq 0 ]; then
+          exit 0
+        else
+          continue
+        fi
       ;;
       list-instances)
         doListAllInstances "${options[@]}"
@@ -3286,7 +4066,7 @@ main(){
         exit 1
       ;;
       "")
-        echo "arkmanager v${arkstVersion}: no command specified"
+        echo "asamanager v${arkstVersion}: no command specified"
         showUsage
         exit 1
       ;;
@@ -3359,7 +4139,7 @@ main(){
         ;;
         restart)
           doStop restart "${options[@]}"
-          echo "$(timestamp): stop" >> "$logdir/$arkmanagerLog"
+          echo "$(timestamp): stop" >> "$logdir/$asamanagerLog"
         ;;
         cancelshutdown)
           doCancelShutdown "${options[@]}"
@@ -3372,6 +4152,34 @@ main(){
         ;;
         checkupdate)
           checkForUpdate
+        ;;
+        checkmodupdate)
+          checkForModUpdate "${options[@]}"
+        ;;
+        installmod)
+          doInstallMod "${args[@]}" "${options[@]}"
+        ;;
+        enablemod)
+          doEnableMod "${args[@]}"
+        ;;
+        disablemod)
+          doDisableMod "${args[@]}"
+        ;;
+        installmods)
+          doInstallAllMods "${options[@]}"
+        ;;
+        uninstallmods)
+          doUninstallAllMods
+        ;;
+        uninstallmod)
+          doUninstallMod "${args[@]}"
+        ;;
+        reinstallmod)
+          doUninstallMod "${args[@]}"
+          doInstallMod "${args[@]}" "${options[@]}"
+        ;;
+        list-mods)
+          listMods
         ;;
         backup)
           doBackup "${options[@]}"
@@ -3404,7 +4212,7 @@ main(){
           getServerPID
         ;;
         *)
-          echo -n "arkmanager v${arkstVersion}: unknown command '$command' specified"
+          echo -n "asamanager v${arkstVersion}: unknown command '$command' specified"
           showUsage
           exit 255
         ;;
@@ -3423,7 +4231,7 @@ main(){
       sleep 1
       for instance in "${instances[@]}"; do
       (
-        echo "$(timestamp): restart" >> "$logdir/$arkmanagerLog"
+        echo "$(timestamp): restart" >> "$logdir/$asamanagerLog"
         useConfig "$instance"
         doStart "${options[@]}"
       )
