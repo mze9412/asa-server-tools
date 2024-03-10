@@ -901,8 +901,13 @@ function getServerMapName(){
 # Gets the saved worlds directory
 #
 function getSavedArksDirectory(){
-  local savedir="SavedArks/TheIsland_WP"
+  local savedir="SavedArks/${serverMap}"
   local saverootdir="$1"
+
+  # if serverMapDir is set, use it instead of serverMap
+  if [ -n "${serverMapDir}" ]; then
+    savedir="SavedArks/${serverMapDir}"
+  fi
 
   # Get save directory name
   if [ -n "${ark_AltSaveDirectoryName}" ]; then
@@ -1188,7 +1193,8 @@ doRun() {
     ' <"${arkserverroot}/${arkserverdir}/Content/Mods/${serverMapModId}/mod.info")"
     arkserveropts="${serverMap}?MapModID=${serverMapModId}"
   fi
-
+  
+  
   if [ -z "$arkserveropts" ]; then
     arkserveropts="TheIsland"
   fi
