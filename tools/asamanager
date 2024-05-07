@@ -1,7 +1,7 @@
 #!/bin/bash
 # shellcheck disable=SC2031,SC2155
 
-# ARK: survival evolved manager
+# ARK: Survival Ascended manager
 #
 # Original author:      LeXaT
 # Original Maintainer:  FezVrasta
@@ -10,10 +10,13 @@
 # Fork Maintainer:      StevenB83, mze9412 (Norwegian-Vikings/asa-server-tools)
 
 
-### Proton testing
-export XDG_RUNTIME_DIR='/run/user/0'
-export STEAM_COMPAT_CLIENT_INSTALL_PATH='/home/steam/.local/share/Steam'
-export STEAM_COMPAT_DATA_PATH='/home/steam/.local/share/Steam/steamapps/compatdata/2430930'
+### Enable prefix variables if proton is used (linux_useGEProton or linux_useLutrisGeProton)
+if [ -z "$linux_useLutrisGeProton" ] || [ -z "$linux_useGEProton" ]; then
+  export XDG_RUNTIME_DIR='/run/user/0'
+  export STEAM_COMPAT_CLIENT_INSTALL_PATH='/home/steam/.local/share/Steam'
+  export STEAM_COMPAT_DATA_PATH='/home/steam/.local/share/Steam/steamapps/compatdata/2430930'
+fi
+
 
 
 #disable exportall so options are no exported under Debian et al.
@@ -34,7 +37,7 @@ arkstCommit='17bcc0b4f8c7cc01603ff308f28b98cd54429e21'
 # Set this if you are a distribution package maintainer otherwise leave empty
 arkstUsePkgManager=''
 
-# Set this to allow variable expansion in variables sourced from arkmanager.cfg
+# Set this to allow variable expansion in variables sourced from asamanager.cfg
 arkstRootUseEnv=''
 
 # Set this to override the main fork
@@ -49,9 +52,9 @@ arkstUserCfgFileOverride=''
 
 ### Do not modify the following settings in an installer or package manager - use the above overrides instead
 
-arkstGithubRepo="${arkstGithubRepoOverride:-arkmanager/ark-server-tools}"
-arkstGlobalCfgFile="${arkstGlobalCfgFileOverride:-/etc/arkmanager/arkmanager.cfg}"
-arkstUserCfgFile="${arkstUserCfgFileOverride:-.arkmanager.cfg}"
+arkstGithubRepo="${arkstGithubRepoOverride:-asamanager/ark-server-tools}"
+arkstGlobalCfgFile="${arkstGlobalCfgFileOverride:-/etc/asamanager/asamanager.cfg}"
+arkstUserCfgFile="${arkstUserCfgFileOverride:-.asamanager.cfg}"
 
 arkstScriptPath="${0}"
 if [[ "${arkstScriptPath}" != /* ]]; then
@@ -60,7 +63,7 @@ fi
 
 doUpgradeTools() {
   if [ -n "$arkstUsePkgManager" ]; then
-    echo "arkmanager v${arkstVersion}: Please check for, and install, updates using your system's package manager"
+    echo "asamanager v${arkstVersion}: Please check for, and install, updates using your system's package manager"
   else
     local sudo=sudo
     if [ "$(id -u)" == 0 ] || [ "$steamcmd_user" == "--me" ]; then
@@ -78,7 +81,7 @@ doUpgradeTools() {
       reinstall_args=( "${reinstall_args[@]}" "--datadir" "$install_datadir" )
     fi
 
-    echo "arkmanager v${arkstVersion}: Checking for updates..."
+    echo "asamanager v${arkstVersion}: Checking for updates..."
 
     if [ -n "$arkstUnstable" ] || [ "$arkstChannel" != "master" ]; then
       doUpgradeToolsFromBranch
@@ -108,7 +111,7 @@ doUpgradeToolsFromCommit(){
          -e "s|^arkstGithubRepoOverride='.*'|arkstGithubRepoOverride='${arkstGithubRepoOverride}'|" \
          -e "s|^arkstGlobalCfgFileOverride='.*'|arkstGlobalCfgFileOverride='${arkstGlobalCfgFileOverride}'|" \
          -e "s|^arkstUserCfgFileOverride='.*'|arkstUserCfgFileOverride='${arkstUserCfgFileOverride}'|" \
-         arkmanager
+         asamanager
   echo "Running install.sh"
   $sudo bash install.sh "$steamcmd_user" "${reinstall_args[@]}"
   result=$?
@@ -188,7 +191,7 @@ doUpgradeToolsFromRelease(){
 
 doUninstallTools() {
   if [ -n "$arkstUsePkgManager" ]; then
-    echo "arkmanager v${arkstVersion}: Please uninstall using your system's package manager"
+    echo "asamanager v${arkstVersion}: Please uninstall using your system's package manager"
   else
     local sudo=sudo
     if [ "$(id -u)" == 0 ] || [ "$steamcmd_user" == "--me" ]; then
@@ -198,11 +201,11 @@ doUninstallTools() {
     read -p "Are you sure you want to uninstall the ARK Server Tools? [y/N]" -n 1 -r
 
     if [[ "$REPLY" =~ ^[Yy]$ ]]; then
-      if [ -n "${install_datadir}" ] && [ -x "${install_datadir}/arkmanager-uninstall.sh" ]; then
-        $sudo "${install_datadir}/arkmanager-uninstall.sh"
+      if [ -n "${install_datadir}" ] && [ -x "${install_datadir}/asamanager-uninstall.sh" ]; then
+        $sudo "${install_datadir}/asamanager-uninstall.sh"
         exit 0
-      elif [ -n "${install_libexecdir}" ] && [ -x "${install_libexecdir}/arkmanager-uninstall.sh" ]; then
-        $sudo "${install_libexecdir}/arkmanager-uninstall.sh"
+      elif [ -n "${install_libexecdir}" ] && [ -x "${install_libexecdir}/asamanager-uninstall.sh" ]; then
+        $sudo "${install_libexecdir}/asamanager-uninstall.sh"
         exit 0
       fi
     fi
@@ -229,8 +232,8 @@ runAsRoot(){
   arkstChannel="$(getConfigVar arkstChannel "master")"
   arkstUnstable="$(getConfigVar arkstUnstable "")"
   install_bindir="$(getConfigVar install_bindir "${0%/*}")"
-  install_libexecdir="$(getConfigVar install_libexecdir "${install_bindir%/*}/libexec/arkmanager")"
-  install_datadir="$(getConfigVar install_datadir "${install_bindir%/*}/share/arkmanager")"
+  install_libexecdir="$(getConfigVar install_libexecdir "${install_bindir%/*}/libexec/asamanager")"
+  install_datadir="$(getConfigVar install_datadir "${install_bindir%/*}/share/asamanager")"
   steamcmd_user="$(getConfigVar steamcmd_user "steam")"
   steamcmd_user_shellexec="$(getConfigVar steamcmd_user_shellexec "${BASH:-/bin/bash}")"
 
@@ -272,12 +275,12 @@ fi
 
 # Global variables
 if [ -f "${arkstGlobalCfgFile}" ]; then
-    # shellcheck source=arkmanager.cfg.shellcheck
+    # shellcheck source=asamanager.cfg.shellcheck
     source "${arkstGlobalCfgFile}"
 fi
 
 if [ -f "${HOME}/${arkstUserCfgFile}" ]; then
-    # shellcheck source=arkmanager.cfg.shellcheck
+    # shellcheck source=asamanager.cfg.shellcheck
     source "${HOME}/${arkstUserCfgFile}"
 fi
 
@@ -312,18 +315,18 @@ NORMAL="\\033[0;39m"
 # Set TERM to "dumb" if TERM is not set
 export TERM=${TERM:-dumb}
 
-arkmanagerLog="arkmanager.log"  # here are logged the actions performed by arkmanager
+asamanagerLog="asamanager.log"  # here are logged the actions performed by asamanager
 arkserverLog="arkserver.log"    # here is logged the output of ShooterGameServer
 
 appid="${appid:-376030}"
 mod_appid="${mod_appid:-346110}"
 install_bindir="${install_bindir:-${0%/*}}"
-install_libexecdir="${install_libexecdir:-${install_bindir%/*}/libexec/arkmanager}"
+install_libexecdir="${install_libexecdir:-${install_bindir%/*}/libexec/asamanager}"
 
 if [ "$steamcmd_user" == "--me" ]; then
-  install_datadir="${install_datadir:-${HOME}/.share/local/arkmanager}"
+  install_datadir="${install_datadir:-${HOME}/.share/local/asamanager}"
 else
-  install_datadir="${install_datadir:-${install_bindir%/*}/share/arkmanager}"
+  install_datadir="${install_datadir:-${install_bindir%/*}/share/asamanager}"
 fi
 
 #---------------------
@@ -338,11 +341,11 @@ timestamp() {
 }
 
 #
-# Log a message to arkmanager.log, and exho it to the console
+# Log a message to asamanager.log, and exho it to the console
 #
 logprint(){
   printf "%s\n" "$*"
-  printf "%s: [%s] %s\n" "$(timestamp)" "${instance}" "$*" >>"${logdir}/${arkmanagerLog}"
+  printf "%s: [%s] %s\n" "$(timestamp)" "${instance}" "$*" >>"${logdir}/${asamanagerLog}"
 }
 
 #
@@ -772,7 +775,7 @@ function checkForUpdate(){
     echo -e "Current version:" "$RED" "$instver" "$NORMAL"
     echo -e "Available version:" "$GREEN" "$bnumber" "$NORMAL"
     echo -e "Your server needs to be restarted in order to receive the latest update."
-    echo -e "Run \"arkmanager update\" to do so"
+    echo -e "Run \"asamanager update\" to do so"
     return 1
   else
     tput rc; tput ed;
@@ -1136,7 +1139,7 @@ doRun() {
   fi
 
   # $$ returns the main process, $BASHPID returns the current process
-  echo "$BASHPID" >"${arkserverroot}/${arkmanagerpidfile}"
+  echo "$BASHPID" >"${arkserverroot}/${asamanagerpidfile}"
 
   if [ -f "${arkserverroot}/${arkupdatelockfile}" ]; then
     local updatepid="$(<"${arkserverroot}/${arkupdatelockfile}")"
@@ -1334,11 +1337,22 @@ doRun() {
     printf " %q" "$arkserverroot/$arkserverexec" "$arkserveropts" "${arkextraopts[@]}"
     echo
     # Put the server process into the background so we can monitor it
-    /home/steam/.local/share/Steam/compatibilitytools.d/GE-Proton8-23/proton run "$arkserverroot/$arkserverexec" "$arkserveropts" "${arkextraopts[@]}" &
+
+    if [ -z "$linux_useGEProton"]; then
+      /home/steam/.local/share/Steam/compatibilitytools.d/$linux_useGEProton/proton run "$arkserverroot/$arkserverexec" "$arkserveropts" "${arkextraopts[@]}" &
+    else if [ -z ""]; then 
+        WINEDEBUG=-all /home/steam/.local/share/Steam/compatibilitytools.d/$linux_useLutrisGeProton/bin/wine64 "$arkserverroot/$arkserverexec" "$arkserveropts" "${arkextraopts[@]}" &
+    else
+      "$arkserverroot/$arkserverexec" "$arkserveropts" "${arkextraopts[@]}" &
+    fi
+    # WINEDEBUG=-all /home/steam/.local/share/Steam/compatibilitytools.d/lutris-GE-Proton8-26-x86_64/bin/wine64 "$arkserverroot/$arkserverexec" "$arkserveropts" "${arkextraopts[@]}" &
+    #/home/steam/.local/share/Steam/compatibilitytools.d/GE-Proton9-4/proton run "$arkserverroot/$arkserverexec" "$arkserveropts" "${arkextraopts[@]}" &
+
     # Grab the server PID
     serverpid=$!
     echo "$serverpid" >"${arkserverroot}/${arkserverpidfile}"
     echo "$(timestamp): Server PID: $serverpid"
+    
     # Disable auto-restart so we don't get caught in a restart loop
     rm -f "$arkserverroot/$arkautorestartfile"
     restartserver=0
@@ -1349,12 +1363,12 @@ doRun() {
     fi
     # Retries for checking if the server comes back up after going down
     serverdowntries=0
-
     sleep 5
 
     while true; do
       # Grab the current server PID
       local pid="$(getServerPID)"
+      logprint "Current PID: $pid"
       if [ "$pid" == "$serverpid" ]; then
         serverdowntries=0
         if [ "$serveronline" -eq 0 ]; then
@@ -1574,7 +1588,7 @@ doStartAll(){
   for cfg in "${!configfile_@}"; do
     if [ -f "${!cfg}" ]; then
       (
-        # shellcheck source=arkmanager.cfg.shellcheck
+        # shellcheck source=asamanager.cfg.shellcheck
         source "${!cfg}"
         doStart
       )
@@ -1637,8 +1651,8 @@ doStop() {
       kill -KILL "$PID" >/dev/null 2>&1
     fi
 
-    if [ -f "${arkserverroot}/${arkmanagerpidfile}" ]; then
-      PID="$(<"${arkserverroot}/${arkmanagerpidfile}")"
+    if [ -f "${arkserverroot}/${asamanagerpidfile}" ]; then
+      PID="$(<"${arkserverroot}/${asamanagerpidfile}")"
       if [ -n "$PID" ]; then
         kill "$PID" >/dev/null 2>&1
       fi
@@ -1646,7 +1660,7 @@ doStop() {
 
     rm -f "${arkserverroot}/${arkserverpidfile}"
     rm -f "${arkserverroot}/${arkserveroldpidfile}"
-    rm -f "${arkserverroot}/${arkmanagerpidfile}"
+    rm -f "${arkserverroot}/${asamanagerpidfile}"
 
     tput rc; tput ed;
     logprint "The server has been stopped"
@@ -1663,7 +1677,7 @@ doStopAll(){
   for cfg in "${!configfile_@}"; do
     if [ -f "${!cfg}" ]; then
       (
-        # shellcheck source=arkmanager.cfg.shellcheck
+        # shellcheck source=asamanager.cfg.shellcheck
         source "${!cfg}"
         doStop
       )
@@ -1682,7 +1696,7 @@ doKill() {
   kill -KILL "$PID" >/dev/null 2>&1
   rm -f "${arkserverroot}/${arkserverpidfile}"
   rm -f "${arkserverroot}/${arkserveroldpidfile}"
-  rm -f "${arkserverroot}/${arkmanagerpidfile}"
+  rm -f "${arkserverroot}/${asamanagerpidfile}"
   logprint "The server has been killed"
 }
 
@@ -2078,7 +2092,7 @@ doUpdate() {
       --betapassword=*) appbetapass="${arg#--betapassword=}"; ;;
       *)
         echo "Unrecognized option $arg"
-        echo "Try 'arkmanager -h' or 'arkmanager --help' for more information."
+        echo "Try 'asamanager -h' or 'asamanager --help' for more information."
         exit 1
     esac
   done
@@ -2179,8 +2193,8 @@ doUpdate() {
     fi
   fi
 
-  if [[ -f "$arkserverroot/$arkmanagerpidfile" && "$arkserverroot/$arkmanagerpidfile" -ot "${arkserverroot}/${arkupdatetimefile}" ]]; then
-    local mgrpid="$(<"$arkserverroot/$arkmanagerpidfile")"
+  if [[ -f "$arkserverroot/$asamanagerpidfile" && "$arkserverroot/$asamanagerpidfile" -ot "${arkserverroot}/${arkupdatetimefile}" ]]; then
+    local mgrpid="$(<"$arkserverroot/$asamanagerpidfile")"
     if (( mgrpid != 0 )); then
       logprint "Server was updated while it was running"
       bgupdate=1
@@ -2330,15 +2344,15 @@ doUpdate() {
       if [ $serverWasAlive -eq 1 ] || [ -f "${arkserverroot}/.startAfterUpdate-${instance}" ]; then
         rm -f "${arkserverroot}/.startAfterUpdate-${instance}"
         if [ -n "$use_systemd" ]; then
-          sudo systemctl start "arkmanager@$instance"
+          sudo systemctl start "asamanager@$instance"
         elif [ -n "$use_service" ]; then
-          if [ -f "/etc/init.d/arkmanager" ]; then
-            sudo "/etc/init.d/arkmanager" start "$instance"
-          elif [ -f "/etc/rc.d/init.d/arkmanager" ]; then
-            sudo "/etc/rc.d/init.d/arkmanager" start "$instance"
+          if [ -f "/etc/init.d/asamanager" ]; then
+            sudo "/etc/init.d/asamanager" start "$instance"
+          elif [ -f "/etc/rc.d/init.d/asamanager" ]; then
+            sudo "/etc/rc.d/init.d/asamanager" start "$instance"
           fi
         elif [ -n "$use_upstart" ]; then
-          sudo start arkmanager "service=$instance"
+          sudo start asamanager "service=$instance"
         else
           doStart --noautoupdate
         fi
@@ -2374,7 +2388,7 @@ doBackup(){
       --no-cluster) backupCluster=false; ;;
       *)
         echo "Unrecognized option $arg"
-        echo "Try 'arkmanager -h' or 'arkmanager --help' for more information."
+        echo "Try 'asamanager -h' or 'asamanager --help' for more information."
         exit 1
     esac
   done
@@ -2657,7 +2671,7 @@ doInstallCronJob(){
   cmdargs=""
   instargs=""
   output=">/dev/null 2>&1"
-  arkmanagerpath="${0}"
+  asamanagerpath="${0}"
   command="$1"
   shift
 
@@ -2697,10 +2711,10 @@ doInstallCronJob(){
     done
   fi
 
-  cronjob="${minute} ${hour} * * * ${arkmanagerpath} --cronjob ${command} ${instargs} ${cmdopts} --args ${cmdargs} -- ${output}"
+  cronjob="${minute} ${hour} * * * ${asamanagerpath} --cronjob ${command} ${instargs} ${cmdopts} --args ${cmdargs} -- ${output}"
 
   (crontab -l | \
-    sed -e "\\# [*] [*] [*] ${arkmanagerpath} --cronjob ${command} ${instargs} #d";
+    sed -e "\\# [*] [*] [*] ${asamanagerpath} --cronjob ${command} ${instargs} #d";
     echo "${cronjob}" ) | \
     crontab -
 }
@@ -2709,11 +2723,11 @@ doInstallCronJob(){
 # Removes an installed cron job
 #
 doRemoveCronJob(){
-  arkmanagerpath="${0}"
+  asamanagerpath="${0}"
   command="$1"
 
   crontab -l | \
-    sed -e "\\# [*] [*] [*] ${arkmanagerpath} --cronjob ${command} @${instance} #d" | \
+    sed -e "\\# [*] [*] [*] ${asamanagerpath} --cronjob ${command} @${instance} #d" | \
     crontab -
 }
 
@@ -2823,7 +2837,7 @@ doWait(){
   fi
 
   for instance in "${instances[@]}"; do
-    pidfile="$(useConfig "$instance"; echo "${arkserverroot}/${arkmanagerpidfile}")"
+    pidfile="$(useConfig "$instance"; echo "${arkserverroot}/${asamanagerpidfile}")"
     pidfiles[$instance]="$pidfile"
   done
 
@@ -2899,7 +2913,7 @@ getAllInstanceNames(){
       fi
     done 3<"${arkstGlobalCfgFile}"
   fi
-  for f in "${HOME}"/.config/arkmanager/instances/*.cfg; do
+  for f in "${HOME}"/.config/asamanager/instances/*.cfg; do
     if [ -f "${f}" ]; then
       instancename="${f##*/}"
       instancename="${instancename%.cfg}"
@@ -2909,7 +2923,7 @@ getAllInstanceNames(){
       fi
     fi
   done
-  for f in /etc/arkmanager/instances/*.cfg; do
+  for f in /etc/asamanager/instances/*.cfg; do
     if [ -f "${f}" ]; then
       instancename="${f##*/}"
       instancename="${instancename%.cfg}"
@@ -2945,7 +2959,7 @@ doPrintConfig(){
   for cfgfile in "$configfile" "${HOME}/${arkstUserCfgFile}" "${arkstGlobalCfgFile}"; do
     if [ -r "$cfgfile" ]; then
       while read -r v; do
-        # shellcheck source=arkmanager.cfg.shellcheck
+        # shellcheck source=asamanager.cfg.shellcheck
         val="$(source "$cfgfile"; echo "${!v}")"
         if [[ "$val" = "${vals[$v]}" && -z "${vars[$v]}" ]]; then
           vars["$v"]="$cfgfile"
@@ -2959,17 +2973,17 @@ doPrintConfig(){
 doTestConfig(){
   set -e
   if [ -r "${arkstGlobalCfgFile}" ]; then
-      # shellcheck source=arkmanager.cfg.shellcheck
+      # shellcheck source=asamanager.cfg.shellcheck
       source "${arkstGlobalCfgFile}"
   fi
 
   if [ -r "${HOME}/${arkstUserCfgFile}" ]; then
-      # shellcheck source=arkmanager.cfg.shellcheck
+      # shellcheck source=asamanager.cfg.shellcheck
       source "${HOME}/${arkstUserCfgFile}"
   fi
 
   if [ -r "$configfile" ]; then
-      # shellcheck source=arkmanager.cfg.shellcheck
+      # shellcheck source=asamanager.cfg.shellcheck
       source "$configfile"
   fi
 
@@ -2984,11 +2998,11 @@ doTestConfig(){
 
 useConfig() {
   configfile=
-  if [ -f "/etc/arkmanager/instances/${1}.cfg" ]; then
-    configfile="/etc/arkmanager/instances/${1}.cfg"
+  if [ -f "/etc/asamanager/instances/${1}.cfg" ]; then
+    configfile="/etc/asamanager/instances/${1}.cfg"
   fi
-  if [[ -f "${HOME}/.config/arkmanager/instances/${1}.cfg" && "${HOME}/.config/arkmanager/instances/${1}.cfg" -nt "/etc/arkmanager/instances/${1}.cfg" ]]; then
-    configfile="${HOME}/.config/arkmanager/instances/${1}.cfg"
+  if [[ -f "${HOME}/.config/asamanager/instances/${1}.cfg" && "${HOME}/.config/asamanager/instances/${1}.cfg" -nt "/etc/asamanager/instances/${1}.cfg" ]]; then
+    configfile="${HOME}/.config/asamanager/instances/${1}.cfg"
   fi
   for varname in "${!configfile_@}"; do
     if [ "configfile_$1" == "$varname" ]; then
@@ -3011,7 +3025,7 @@ useConfig() {
       echo "Error: config file $configfile does not exist"
       exit 1
     fi
-    # shellcheck source=arkmanager.cfg.shellcheck
+    # shellcheck source=asamanager.cfg.shellcheck
     source "$configfile"
   fi
   if [ -z "$arkserverroot" ]; then
@@ -3023,7 +3037,7 @@ useConfig() {
   arkoldautorestartfile="${arkserverdir}/Saved/.autorestart"
   arkserverpidfile="${arkserverpidfile:-${arkserverdir}/Saved/.arkserver-${1}.pid}"
   arkserveroldpidfile="${arkserverdir}/Saved/.arkserver.pid"
-  arkmanagerpidfile="${arkmanagerpidfile:-${arkserverdir}/Saved/.arkmanager-${1}.pid}"
+  asamanagerpidfile="${asamanagerpidfile:-${arkserverdir}/Saved/.asamanager-${1}.pid}"
   arkwarnlockfile="${arkwarnlockfile:-${arkserverdir}/Saved/.ark-warn-${1}.lock}"
   # This is linked to the directory, not to the instance
   arkupdatelockfile="${arkupdatelockfile:-${arkserverdir}/Saved/.ark-update.lock}"
@@ -3055,7 +3069,7 @@ addArkOpt() {
 }
 
 showUsage() {
-  echo -e "Usage: arkmanager [Commands]\n"
+  echo -e "Usage: asamanager [Commands]\n"
   cat <<-EOE
         Commands can be followed by one or more @instance arguments
         The special '@all' instance selects all instances
@@ -3078,7 +3092,6 @@ showUsage() {
         saveworld             Saves the game world to disk
         rconcmd <cmd>         Execute RCON command on server
         checkupdate           Check for a new ARK server version
-        checkmodupdate        Checks for any mods needing updates
         install               Install the ARK server files from steamcmd      
         install-cronjob <cmd> Adds a cron job using the specified command
         remove-cronjob <cmd>  Removes a cron job that used the specified command
@@ -3109,9 +3122,9 @@ showUsage() {
            --downloadonly     Download server update without applying it
                               Requires arkStagingDir be set to a staging directory on the same filesystem as the server
            --no-download      Applies an already downloaded update from the staging directory
-           --systemd          Use the SystemD arkmanager@instance.service to restart the server
-           --service          Use the sysv-init arkmanager service to restart the server
-           --upstart          Use the Upstart arkmanager service to restart the server
+           --systemd          Use the SystemD asamanager@instance.service to restart the server
+           --service          Use the sysv-init asamanager service to restart the server
+           --upstart          Use the Upstart asamanager service to restart the server
            --no-autostart     Don't start the server after updating
            --warnreason=...   Specify an update reason other than the default
            --beta=...         Specify a beta to install (use --beta=public to reset)
@@ -3149,12 +3162,12 @@ EOE
 
 main(){
   if [ -f "${arkstGlobalCfgFile}" ]; then
-      # shellcheck source=arkmanager.cfg.shellcheck
+      # shellcheck source=asamanager.cfg.shellcheck
       source "${arkstGlobalCfgFile}"
   fi
 
   if [ -f "${HOME}/${arkstUserCfgFile}" ]; then
-      # shellcheck source=arkmanager.cfg.shellcheck
+      # shellcheck source=asamanager.cfg.shellcheck
       source "${HOME}/${arkstUserCfgFile}"
   fi
 
@@ -3292,7 +3305,7 @@ main(){
         exit 1
       ;;
       "")
-        echo "arkmanager v${arkstVersion}: no command specified"
+        echo "asamanager v${arkstVersion}: no command specified"
         showUsage
         exit 1
       ;;
@@ -3365,7 +3378,7 @@ main(){
         ;;
         restart)
           doStop restart "${options[@]}"
-          echo "$(timestamp): stop" >> "$logdir/$arkmanagerLog"
+          echo "$(timestamp): stop" >> "$logdir/$asamanagerLog"
         ;;
         cancelshutdown)
           doCancelShutdown "${options[@]}"
@@ -3410,7 +3423,7 @@ main(){
           getServerPID
         ;;
         *)
-          echo -n "arkmanager v${arkstVersion}: unknown command '$command' specified"
+          echo -n "asamanager v${arkstVersion}: unknown command '$command' specified"
           showUsage
           exit 255
         ;;
@@ -3429,7 +3442,7 @@ main(){
       sleep 1
       for instance in "${instances[@]}"; do
       (
-        echo "$(timestamp): restart" >> "$logdir/$arkmanagerLog"
+        echo "$(timestamp): restart" >> "$logdir/$asamanagerLog"
         useConfig "$instance"
         doStart "${options[@]}"
       )

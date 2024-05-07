@@ -65,7 +65,9 @@ apt install -y lib32gcc-s1 steamcmd steam-launcher
 
 # Grab Proton from Glorious Eggroll
 # https://github.com/GloriousEggroll/proton-ge-custom
-PROTON_URL="https://github.com/GloriousEggroll/proton-ge-custom/releases/download/GE-Proton8-23/GE-Proton8-23.tar.gz"
+# PROTON_URL="https://github.com/GloriousEggroll/proton-ge-custom/releases/download/GE-Proton8-23/GE-Proton8-23.tar.gz"
+#PROTON_URL="https://github.com/GloriousEggroll/proton-ge-custom/releases/download/GE-Proton9-4/GE-Proton9-4.tar.gz"
+PROTON_URL="https://github.com/GloriousEggroll/wine-ge-custom/releases/download/GE-Proton8-26/wine-lutris-GE-Proton8-26-x86_64.tar.xz"
 PROTON_TGZ="$(basename "$PROTON_URL")"
 PROTON_NAME="$(basename "$PROTON_TGZ" ".tar.gz")"
 if [ ! -e "/home/steam/game-resources/$PROTON_TGZ" ]; then
@@ -73,7 +75,7 @@ if [ ! -e "/home/steam/game-resources/$PROTON_TGZ" ]; then
 fi
 
 # Install ARK Survival Ascended Dedicated
-sudo -u steam /usr/games/steamcmd +force_install_dir /home/steam/asa +login anonymous +app_update 2430930 validate +quit
+# sudo -u steam /usr/games/steamcmd +force_install_dir /home/steam/asa +login anonymous +app_update 2430930 validate +quit
 
 
 # Determine where Steam is installed
