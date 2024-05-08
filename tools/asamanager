@@ -1337,11 +1337,10 @@ doRun() {
     printf " %q" "$arkserverroot/$arkserverexec" "$arkserveropts" "${arkextraopts[@]}"
     echo
     # Put the server process into the background so we can monitor it
-
-    if [ -z "$linux_useGEProton"]; then
+    if [ -n "$linux_useGEProton" ]; then
       /home/steam/.local/share/Steam/compatibilitytools.d/$linux_useGEProton/proton run "$arkserverroot/$arkserverexec" "$arkserveropts" "${arkextraopts[@]}" &
-    else if [ -z ""]; then 
-        WINEDEBUG=-all /home/steam/.local/share/Steam/compatibilitytools.d/$linux_useLutrisGeProton/bin/wine64 "$arkserverroot/$arkserverexec" "$arkserveropts" "${arkextraopts[@]}" &
+    elif [ -n "$linux_useLutrisGeProton" ]; then 
+      WINEDEBUG=-all /home/steam/.local/share/Steam/compatibilitytools.d/$linux_useLutrisGeProton/bin/wine64 "$arkserverroot/$arkserverexec" "$arkserveropts" "${arkextraopts[@]}" &
     else
       "$arkserverroot/$arkserverexec" "$arkserveropts" "${arkextraopts[@]}" &
     fi
