@@ -1241,6 +1241,15 @@ doRun() {
   done < <(sed -n 's/^\(ark\(\|opt\|flag\)_[^= ]*\)=.*/\1/p' <"$configfile")
 
   # bring in ark_... options
+
+  # ark_ options must have ServerAdminPassword last, so extract it here from list and store it temporary, add it then ad the very end
+  for varname in "${!ark_@}"; do
+    if [[ "${varname}" == "ark_ServerAdminPassword" ]]; then
+      serverAdminPassword="${!varname}"
+      usedoptions[${varname}]="${serverAdminPassword}"
+    fi
+  done
+
   # shellcheck disable=SC2154
   for varname in "${!ark_@}"; do
     if [ -z "${usedoptions[${varname}]}" ]; then
@@ -1293,19 +1302,16 @@ doRun() {
     fi
   done
 
-  if [[ " ${arkextraopts[*]} " =~ " -automanagedmods " ]]; then
-    steamcmdroot="${arkserverroot}/Engine/Binaries/ThirdParty/SteamCMD/Linux"
-    steamcmdexec="steamcmd.sh"
-    doDownloadSteamCMD
-  fi
-
-  #arkserveropts="${arkserveropts}?listen"
-
   if [ -n "${arkCustomDynamicConfigURL}" ]; then
     arkserveropts="${arkserveropts}?customdynamicconfigurl=${arkCustomDynamicConfigURL}"
     if [[ -z "${usedoptions[arkflag_UseDynamicConfig]}" && -z "${usedoptions[arkopt_UseDynamicConfig]}" ]]; then
       arkextraopts=( "${arkextraopts[@]}" "-UseDynamicConfig" )
     fi
+  fi
+
+  # add ServerAdminPassword to the end of the arkserveropts string. Must be done here because the block before might add ?customdynamicconfigurl and we need to add password after that
+  if [ -n "${serverAdminPassword}" ]; then
+    arkserveropts="${arkserveropts}?ServerAdminPassword=${serverAdminPassword}"
   fi
 
   # run the server in background
