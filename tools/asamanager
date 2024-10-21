@@ -1217,10 +1217,15 @@ doRun() {
           (( val = val - 1 ))
         fi
 
-        if [ -n "$val" ]; then
-          arkserveropts="${arkserveropts}?${name}=${val}"
+        # if name is ServerAdminPassword, then we need to cache it instead of adding it now, then add it at the very end later
+        if [[ "$name" == "ServerAdminPassword" ]]; then
+          serverAdminPassword="${val}"
         else
+          if [ -n "$val" ]; then
+            arkserveropts="${arkserveropts}?${name}=${val}"
+          else
           arkserveropts="${arkserveropts}?${name}"
+          fi
         fi
       ;;
       arkopt_*)
@@ -1373,7 +1378,6 @@ doRun() {
     while true; do
       # Grab the current server PID
       local pid="$(getServerPID)"
-      logprint "Current PID: $pid"
       if [ "$pid" == "$serverpid" ]; then
         serverdowntries=0
         if [ "$serveronline" -eq 0 ]; then
