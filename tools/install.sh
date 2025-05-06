@@ -369,7 +369,7 @@ else
 fi
 
 if [ "$installproton" = "yes" ]; then
-  PROTON_URL="https://github.com/GloriousEggroll/wine-ge-custom/releases/download/GE-Proton8-26/wine-lutris-GE-Proton8-26-x86_64.tar.xz"
+  PROTON_URL="https://github.com/GloriousEggroll/proton-ge-custom/releases/download/GE-Proton9-27/GE-Proton9-27.tar.gz"
   PROTON_TGZ="$(basename "$PROTON_URL")"
   PROTON_NAME="$(basename "$PROTON_TGZ" ".tar.gz")"
 
