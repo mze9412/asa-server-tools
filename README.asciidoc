@@ -540,7 +540,7 @@ have this instead in `$HOME/.steam/logs/workshop_log.txt`.
 You will need to modify this setting if this is the case.
 
 `steamdataroot`::
-    The path to the SteamCMD data.
+    The path to the SteamCMD data.
 +
 Defaults to `$steamcmdroot`
 +
