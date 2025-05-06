@@ -4,7 +4,7 @@
 # Net Installer, used with curl
 #
 
-arkstGithubRepo="mze9412/asa-server-tools"
+arkstGithubRepo="ArkSurvivalAscended/asa-server-tools"
 
 steamcmd_user="$1"
 shift
@@ -65,7 +65,7 @@ function doInstallFromCommit(){
   if [ -z "$tmpdir" ]; then echo "Unable to create temporary directory"; exit 1; fi
   cd "$tmpdir" || die "Unable to change to temporary directory"
   echo "Downloading installer"
-  curl -s -L "https://github.com/${arkstGithubRepo}/archive/${commit}.tar.gz" | tar -xz
+  curl -s -L "https://git.mze9412.info/${arkstGithubRepo}/archive/${commit}.tar.gz" | tar -xz
   cd "asa-server-tools-${commit}/tools" || die "Unable to change to extracted directory"
   if [ ! -f "install.sh" ]; then echo "install.sh not found in $PWD"; exit 1; fi
   sed -i -e "s|^arkstCommit='.*'|arkstCommit='${commit}'|" \
@@ -94,13 +94,13 @@ function doInstallFromRelease(){
     case "${n}" in
       tag_name) tagname="${v}"; ;;
     esac
-  done < <(curl -s "https://api.github.com/repos/${arkstGithubRepo}/releases/latest" | sed -n 's/^  "\([^"]*\)": "*\([^"]*\)"*,*/\1\t\2/p')
+  done < <(curl -s "https://git.mze9412.info/api/v1/repos/${arkstGithubRepo}/releases/latest" | sed -n 's/^  "\([^"]*\)": "*\([^"]*\)"*,*/\1\t\2/p')
 
   if [ -n "$tagname" ]; then
     echo "Latest release is ${tagname}"
     echo "Getting commit for latest release..."
     # shellcheck disable=SC2155
-    local commit="$(curl -s "https://api.github.com/repos/${arkstGithubRepo}/git/refs/tags/${tagname}" | sed -n 's/^ *"sha": "\(.*\)",.*/\1/p')"
+    local commit="$(curl -s "https://git.mze9412.info/api/v1/repos/${arkstGithubRepo}/git/refs/tags/${tagname}" | sed -n 's/^ *"sha": "\(.*\)",.*/\1/p')"
     doInstallFromCommit "$commit" "$@"
   else
     echo "Unable to get latest release"
@@ -111,8 +111,8 @@ function doInstallFromRelease(){
 function doInstallFromBranch(){
   channel="$1"
   shift
-  commit="$(curl -s "https://api.github.com/repos/${arkstGithubRepo}/git/refs/heads/${channel}" | sed -n 's/^ *"sha": "\(.*\)",.*/\1/p')"
-
+  commit="$(curl -s "https://git.mze9412.info/repos/api/v1/${arkstGithubRepo}/git/refs/heads/${channel}" | sed -n 's/^ *"sha": "\(.*\)",.*/\1/p')"
+  
   if [ -z "$commit" ]; then
     if [ -n "$unstable" ]; then
       echo "Channel ${channel} not found - trying master"

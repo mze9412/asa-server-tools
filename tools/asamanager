@@ -39,7 +39,7 @@ arkstUsePkgManager=''
 arkstRootUseEnv=''
 
 # Set this to override the main fork
-arkstGithubRepoOverride='StevenB83/ark-server-tools'
+arkstGithubRepoOverride='mze9412/ark-server-tools'
 
 # Set this to override the global config file path
 arkstGlobalCfgFileOverride=''
