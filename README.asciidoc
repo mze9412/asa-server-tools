@@ -3,26 +3,6 @@
 This tool allows you to manage any ARK: Survival Ascended linux server without having to remember long commands.
 It provides a lot of features, to get the full list check the <<Usage>> section.
 
-Known issue with updating
--------------------------
-If updating from 1.6.53 or earlier, you will likely get the following message:
-```
-Unable to get latest release
-```
-If updating from 1.6.53 or earlier, and `arkstUnstable` is set, then it is likely to say that a hotfix is available, but fail to install it.
-
-Please either:
-
-* edit `asamanager` wherever it is installed, and replace
-+
-`arkstGithubRepo="Norwegian-Vikings/asa-server-tools"`
-+
-with
-+
-`arkstGithubRepo="Norwegian-Vikings/asa-server-tools"`
-+
-or
-* re-install using the netinstall script below.
 
 Installation
 ------------
@@ -64,9 +44,6 @@ sed
 tar
 ```
 
-If using CentOS 6 or earlier, or Debian 7 or earlier, you will need to compile a newer version of glibc.
-See https://github.com/Norwegian-Vikings/asa-server-tools/wiki/Install-of-required-versions-of-glibc-and-gcc-on-RHEL-CentOS
-
 To use ASA Server Tools, you will need to install **SteamCMD** following this guide:
 
 https://developer.valvesoftware.com/wiki/SteamCMD#Linux
@@ -79,16 +56,11 @@ Requirements
 To allow your ASA server to communicate with the outside you have to open some ports in your firewall:
 
 ```sh
-iptables -I INPUT -p udp --dport 27016 -j ACCEPT
-iptables -I INPUT -p tcp --dport 27016 -j ACCEPT
 iptables -I INPUT -p udp --dport 7777 -j ACCEPT
-iptables -I INPUT -p tcp --dport 7777 -j ACCEPT
-iptables -I INPUT -p udp --dport 7778 -j ACCEPT
-iptables -I INPUT -p tcp --dport 7778 -j ACCEPT
 iptables -I INPUT -p tcp --dport 32330 -j ACCEPT
 ```
 
-NB: Change the ports according to the ones set in your `asamanager.cfg` file.
+NB: Change the ports according to the ones set in your `asamanager.cfg` file. GamePort is UDP, RCON port is using TCP.
 
 Install ASA Server Tools
 ~~~~~~~~~~~~~~~~~~~~~~~~
@@ -96,7 +68,7 @@ Install ASA Server Tools
 To install ASA Server Tools run this command:
 
 [source,sh]
-curl -sL https://raw.githubusercontent.com/Norwegian-Vikings/asa-server-tools/master/netinstall.sh | sudo bash -s steam
+curl -sL https://git.mze9412.info/ARKSurvivalAscended/asa-server-tools/raw/branch/master/netinstall.sh | | sudo bash -s steam --install-proton-ge
 
 NB: You may want to change the `bash -s` parameter to fit your steam user if different from `steam`.
 
@@ -107,7 +79,7 @@ This will copy the `asamanager` script and its daemon to the proper directories 
 To instead perform a user-install of ASA Server Tools as an unprivileged user, run this command:
 
 [source,sh]
-curl -sL https://raw.githubusercontent.com/Norwegian-Vikings/asa-server-tools/master/netinstall.sh | bash -s -- --me
+curl -sL https://git.mze9412.info/ARKSurvivalAscended/asa-server-tools/raw/branch/master/netinstall.sh | bash -s -- --me --install-proton-ge
 
 Configuration
 ~~~~~~~~~~~~~

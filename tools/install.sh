@@ -71,6 +71,9 @@ while [ -n "$1" ]; do
     --install-service)
       installservice=yes
     ;;
+    --install-proton-gen)
+      installproton=yes
+    ;;
     -*)
       echo "Invalid option '$1'"
       showusage=yes
@@ -109,12 +112,18 @@ if [ "$userinstall" == "yes" ]; then
   DATAPREFIX="${DATAPREFIX:-${PREFIX}/.local/share}"
   CONFIGFILE="${PREFIX}/.asamanager.cfg"
   INSTANCEDIR="${PREFIX}/.config/asamanager/instances"
+
+  # COMPATDIR is in ~/.steam/steam/steamapps/compatdata
+  COMPATDIR="${PREFIX}/.steam/steam/steamapps/compatdata"
 else
   PREFIX="${PREFIX:-/usr/local}"
   EXECPREFIX="${EXECPREFIX:-${PREFIX}}"
   DATAPREFIX="${DATAPREFIX:-${PREFIX}/share}"
   CONFIGFILE="/etc/asamanager/asamanager.cfg"
   INSTANCEDIR="/etc/asamanager/instances"
+
+  # COMPATDIR is in /home/STEAMCMD_USER/.steam/steam/steamapps/compatdata
+  COMPATDIR="/home/$steamcmd_user/.steam/steam/steamapps/compatdata"
 fi
 
 BINDIR="${BINDIR:-${EXECPREFIX}/bin}"
@@ -147,6 +156,8 @@ if [ "$showusage" == "yes" ]; then
     echo "                [DATADIR=${DATADIR}]"
     echo "--install-service"
     echo "                Install the service"
+    echo "--install-proton-ge"
+    echo "                Downloads and installs Proton-GE for use with asamanager. If you do not use this flag you have to install your own version of Proton."
     exit 1
 fi
 
@@ -355,6 +366,26 @@ else
       cp -n "${INSTALL_ROOT}/${INSTANCEDIR}/instance.cfg.example" "${INSTALL_ROOT}/${INSTANCEDIR}/main.cfg"
       chown "$steamcmd_user" "${INSTALL_ROOT}${INSTANCEDIR}/main.cfg"
     fi
+fi
+
+if [ "$installproton" = "yes" ]; then
+  PROTON_URL="https://github.com/GloriousEggroll/wine-ge-custom/releases/download/GE-Proton8-26/wine-lutris-GE-Proton8-26-x86_64.tar.xz"
+  PROTON_TGZ="$(basename "$PROTON_URL")"
+  PROTON_NAME="$(basename "$PROTON_TGZ" ".tar.gz")"
+
+  # use COMPATDIR as base directory for PROTON_GE logic below
+  if [ ! -e "$COMPATDIR/$PROTON_TGZ" ]; then
+    wget "$PROTON_URL" -O "/home/steam/game-resources/$PROTON_TGZ"
+  fi
+  
+  STEAMDIR="$COMPATDIR/.local/share/Steam"
+  # Extract GE Proton into this user's Steam path
+  [ -d "$STEAMDIR/compatibilitytools.d" ] || sudo -u steam mkdir -p "$STEAMDIR/compatibilitytools.d"
+  sudo -u steam tar -x -C "$STEAMDIR/compatibilitytools.d/" -f "/home/steam/game-resources/$PROTON_TGZ"
+
+  # Install default prefix into game compatdata path
+  [ -d "$STEAMDIR/steamapps/compatdata" ] || sudo -u steam mkdir -p "$STEAMDIR/steamapps/compatdata"
+  [ -d "$STEAMDIR/steamapps/compatdata/2430930" ] || sudo -u steam cp "$STEAMDIR/compatibilitytools.d/$PROTON_NAME/files/share/default_pfx" "$STEAMDIR/steamapps/compatdata/2430930" -r
 fi
 
 exit 0
