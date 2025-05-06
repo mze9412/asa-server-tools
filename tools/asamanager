@@ -6,8 +6,8 @@
 # Original author:      LeXaT
 # Original Maintainer:  FezVrasta
 # Current Maintainer:   klightspeed (arkmanager/ark-server-tools)
-# Contributors:         Sispheor, Atriusftw, klightspeed, lexat, puseidr, chriscpritchard
-# Fork Maintainer:      StevenB83, mze9412 (Norwegian-Vikings/asa-server-tools)
+# Contributors:         Sispheor, Atriusftw, klightspeed, lexat, puseidr, chriscpritchard, StevenB83
+# Fork Maintainer:      mze9412 (https://git.mze9412.de/ArkSurvivalAscended/asa-server-tools)
 
 
 ### Enable prefix variables if proton is used (linux_useGeProton or linux_useLutrisGeProton)
@@ -16,8 +16,6 @@ if [ -z "$linux_useLutrisGeProton" ] || [ -z "$linux_useGeProton" ]; then
   export STEAM_COMPAT_CLIENT_INSTALL_PATH='/home/steam/.local/share/Steam'
   export STEAM_COMPAT_DATA_PATH='/home/steam/.local/share/Steam/steamapps/compatdata/2430930'
 fi
-
-
 
 #disable exportall so options are no exported under Debian et al.
 set +o allexport
