@@ -66,7 +66,7 @@ function doInstallFromCommit(){
   cd "$tmpdir" || die "Unable to change to temporary directory"
   echo "Downloading installer"
   curl -s -L "https://git.mze9412.info/${arkstGithubRepo}/archive/${commit}.tar.gz" | tar -xz
-  cd "asa-server-tools-${commit}/tools" || die "Unable to change to extracted directory"
+  cd "asa-server-tools/tools" || die "Unable to change to extracted directory"
   if [ ! -f "install.sh" ]; then echo "install.sh not found in $PWD"; exit 1; fi
   sed -i -e "s|^arkstCommit='.*'|arkstCommit='${commit}'|" \
          -e "s|^arkstTag='.*'|arkstTag='${tagname}'|" \
@@ -94,13 +94,13 @@ function doInstallFromRelease(){
     case "${n}" in
       tag_name) tagname="${v}"; ;;
     esac
-  done < <(curl -s "https://git.mze9412.info/api/v1/repos/${arkstGithubRepo}/releases/latest" | sed -n 's/^  "\([^"]*\)": "*\([^"]*\)"*,*/\1\t\2/p')
+  done < <(curl -s "https://git.mze9412.info/api/v1/repos/${arkstGithubRepo}/releases/latest" | jq . | sed -n 's/^  "\([^"]*\)": "*\([^"]*\)"*,*/\1\t\2/p')
 
   if [ -n "$tagname" ]; then
     echo "Latest release is ${tagname}"
     echo "Getting commit for latest release..."
     # shellcheck disable=SC2155
-    local commit="$(curl -s "https://git.mze9412.info/api/v1/repos/${arkstGithubRepo}/git/refs/tags/${tagname}" | sed -n 's/^ *"sha": "\(.*\)",.*/\1/p')"
+    local commit="$(curl -s "https://git.mze9412.info/api/v1/repos/${arkstGithubRepo}/git/refs/tags/${tagname}" | jq . | sed -n 's/^ *"sha": "\(.*\)",.*/\1/p')"
     doInstallFromCommit "$commit" "$@"
   else
     echo "Unable to get latest release"

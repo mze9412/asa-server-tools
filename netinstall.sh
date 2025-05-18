@@ -65,6 +65,7 @@ function doInstallFromCommit(){
   if [ -z "$tmpdir" ]; then echo "Unable to create temporary directory"; exit 1; fi
   cd "$tmpdir" || die "Unable to change to temporary directory"
   echo "Downloading installer"
+  echo "https://github.com/${arkstGithubRepo}/archive/${commit}.tar.gz"
   curl -s -L "https://github.com/${arkstGithubRepo}/archive/${commit}.tar.gz" | tar -xz
   cd "asa-server-tools-${commit}/tools" || die "Unable to change to extracted directory"
   if [ ! -f "install.sh" ]; then echo "install.sh not found in $PWD"; exit 1; fi
@@ -100,7 +101,7 @@ function doInstallFromRelease(){
     echo "Latest release is ${tagname}"
     echo "Getting commit for latest release..."
     # shellcheck disable=SC2155
-    local commit="$(curl -s "https://api.github.com/repos/${arkstGithubRepo}/git/refs/tags/${tagname}" | sed -n 's/^ *"sha": "\(.*\)",.*/\1/p')"
+    local commit="$(curl -s "https://api.github.com/repos/${arkstGithubRepo}/git/refs/tags/${tagname}" | jq . | sed -n 's/^ *"sha": "\(.*\)",.*/\1/p')"
     doInstallFromCommit "$commit" "$@"
   else
     echo "Unable to get latest release"

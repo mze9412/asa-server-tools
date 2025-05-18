@@ -71,7 +71,7 @@ while [ -n "$1" ]; do
     --install-service)
       installservice=yes
     ;;
-    --install-proton-gen)
+    --install-proton-ge)
       installproton=yes
     ;;
     -*)
