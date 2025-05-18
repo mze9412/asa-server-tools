@@ -114,7 +114,7 @@ if [ "$userinstall" == "yes" ]; then
   INSTANCEDIR="${PREFIX}/.config/asamanager/instances"
 
   # COMPATDIR is in ~/.steam/steam/steamapps/compatdata
-  COMPATDIR="${PREFIX}/.steam/steam/steamapps/compatdata"
+  COMPATDIR="${HOME}/.steam/steam/steamapps/compatdata"
 else
   PREFIX="${PREFIX:-/usr/local}"
   EXECPREFIX="${EXECPREFIX:-${PREFIX}}"
@@ -380,7 +380,7 @@ if [ "$installproton" = "yes" ]; then
     wget "$PROTON_URL" -O "/home/steam/game-resources/$PROTON_TGZ"
   fi
   
-  STEAMDIR="$COMPATDIR/.local/share/Steam"
+  STEAMDIR="$HOME/.local/share/Steam"
   # Extract GE Proton into this user's Steam path
   [ -d "$STEAMDIR/compatibilitytools.d" ] || sudo -u steam mkdir -p "$STEAMDIR/compatibilitytools.d"
   sudo -u steam tar -x -C "$STEAMDIR/compatibilitytools.d/" -f "/home/steam/game-resources/$PROTON_TGZ"
