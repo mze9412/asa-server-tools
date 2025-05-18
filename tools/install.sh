@@ -375,6 +375,8 @@ if [ "$installproton" = "yes" ]; then
 
   # use COMPATDIR as base directory for PROTON_GE logic below
   if [ ! -e "$COMPATDIR/$PROTON_TGZ" ]; then
+    # Create a directory to store the downloaded Proton
+    [ -d "/home/steam/game-resources" ] || sudo -u steam mkdir -p "/home/steam/game-resources"
     wget "$PROTON_URL" -O "/home/steam/game-resources/$PROTON_TGZ"
   fi
   
