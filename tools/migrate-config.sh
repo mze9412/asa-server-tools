@@ -9,7 +9,7 @@ newopt_arkautorestartfile="ShooterGame/Saved/.autorestart"
 newopt_install_bindir="${BINDIR}"
 newopt_install_libexecdir="${LIBEXECDIR}"
 newopt_install_datadir="${DATADIR}"
-newopt_mod_appid=346110
+newopt_mod_appid=2430930
 
 if grep '^\(servermail\|arkstVersion\)=' "${configfile}" >/dev/null 2>&1; then
   sed -i '/^\(servermail\|arkstVersion\)=/d' "${configfile}"

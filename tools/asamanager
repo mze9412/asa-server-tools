@@ -316,8 +316,8 @@ export TERM=${TERM:-dumb}
 asamanagerLog="asamanager.log"  # here are logged the actions performed by asamanager
 arkserverLog="arkserver.log"    # here is logged the output of ShooterGameServer
 
-appid="${appid:-376030}"
-mod_appid="${mod_appid:-346110}"
+appid="${appid:-2430930}"
+mod_appid="${mod_appid:-2430930}"
 install_bindir="${install_bindir:-${0%/*}}"
 install_libexecdir="${install_libexecdir:-${install_bindir%/*}/libexec/asamanager}"
 

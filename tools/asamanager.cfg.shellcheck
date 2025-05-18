@@ -292,10 +292,10 @@ arkopt_StructureDestructionTag=DestroySwampSnowStructures
 logdir="/var/log/arktools"
 
 # ASA server Steam App ID
-appid=376030
+appid=2430930
 
 # Steam App ID for downloading mods
-mod_appid=346110
+mod_appid=2430930
 
 # Mod OS Selection - should be Windows - Linux mods are known to be incompatible with the ASA server
 mod_branch=Windows
