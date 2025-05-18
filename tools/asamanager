@@ -314,7 +314,7 @@ NORMAL="\\033[0;39m"
 export TERM=${TERM:-dumb}
 
 asamanagerLog="asamanager.log"  # here are logged the actions performed by asamanager
-arkserverLog="arkserver.log"    # here is logged the output of ShooterGameServer
+arkserverLog="asaserver.log"    # here is logged the output of ShooterGameServer
 
 appid="${appid:-2430930}"
 mod_appid="${mod_appid:-2430930}"
