@@ -29,7 +29,7 @@ perl-modules
 curl
 lsof
 libc6-i386
-lib32gcc1
+lib32gcc-s1
 bzip2
 ```
 
