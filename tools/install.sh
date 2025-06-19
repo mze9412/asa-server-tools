@@ -178,7 +178,7 @@ if [ "$userinstall" == "yes" ]; then
            "${INSTALL_ROOT}${DATADIR}/asamanager-uninstall.sh"
 
     # Create a folder in ~/logs to let Ark tools write its own log files
-    mkdir -p "${INSTALL_ROOT}${PREFIX}/logs/arktools"
+    mkdir -p "${INSTALL_ROOT}${PREFIX}/logs/asatools"
 
     # Create a folder in ~/.config/arkamanger to hold instance configs
     mkdir -p "${INSTALL_ROOT}${INSTANCEDIR}"
@@ -194,7 +194,7 @@ if [ "$userinstall" == "yes" ]; then
     # Change the defaults in the new config file
     sed -i -e "s|^steamcmd_user=\"steam\"|steamcmd_user=\"--me\"|" \
            -e "s|\"/home/steam|\"${PREFIX}|" \
-           -e "s|/var/log/arktools|${PREFIX}/logs/arktools|" \
+           -e "s|/var/log/asatools|${PREFIX}/logs/asatools|" \
            -e "s|^install_bindir=.*|install_bindir=\"${BINDIR}\"|" \
            -e "s|^install_libexecdir=.*|install_libexecdir=\"${LIBEXECDIR}\"|" \
            -e "s|^install_datadir=.*|install_datadir=\"${DATADIR}\"|" \
@@ -317,8 +317,8 @@ else
     fi
 
     # Create a folder in /var/log to let Ark tools write its own log files
-    mkdir -p "${INSTALL_ROOT}/var/log/arktools"
-    chown "$steamcmd_user" "${INSTALL_ROOT}/var/log/arktools"
+    mkdir -p "${INSTALL_ROOT}/var/log/asatools"
+    chown "$steamcmd_user" "${INSTALL_ROOT}/var/log/asatools"
 
     # Create a folder in /etc/asamanager to hold instance config files
     mkdir -p "${INSTALL_ROOT}${INSTANCEDIR}"

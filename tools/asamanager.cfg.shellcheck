@@ -288,8 +288,8 @@ arkflag_automanagedmods=
 # Structure Destruction Tag - This was a one-time option when upgrading from before ASA v216
 arkopt_StructureDestructionTag=DestroySwampSnowStructures
 
-# Logs path (default /var/log/arktools)
-logdir="/var/log/arktools"
+# Logs path (default /var/log/asatools)
+logdir="/var/log/asatools"
 
 # ASA server Steam App ID
 appid=2430930

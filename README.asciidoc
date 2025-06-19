@@ -20,6 +20,7 @@ lsof
 glibc.i686
 libstdc++.i686
 bzip2
+jq
 ```
 
 If running under Debian or Ubuntu, you will need the following packages installed:
@@ -31,6 +32,7 @@ lsof
 libc6-i386
 lib32gcc-s1
 bzip2
+jq
 ```
 
 Common prerequisites which should normally already be installed are:
@@ -42,6 +44,7 @@ perl
 rsync
 sed
 tar
+jq
 ```
 
 To use ASA Server Tools, you will need to install **SteamCMD** following this guide:
