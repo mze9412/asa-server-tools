@@ -68,7 +68,8 @@ Install ASA Server Tools
 To install ASA Server Tools run this command:
 
 [source,sh]
-curl -sL https:/ttps://github.com/mze9412/asa-server-tools/raw/branch/master/netinstall.sh | sudo bash -s steam --install-proton-ge
+
+curl -sL https://https://raw.githubusercontent.com/mze9412/asa-server-tools/refs/heads/master/netinstall.sh | sudo bash -s steam --install-proton-ge
 
 NB: You may want to change the `bash -s` parameter to fit your steam user if different from `steam`.
 
@@ -79,7 +80,7 @@ This will copy the `asamanager` script and its daemon to the proper directories 
 To instead perform a user-install of ASA Server Tools as an unprivileged user, run this command:
 
 [source,sh]
-curl -sL https:/ttps://github.com/mze9412/asa-server-tools/raw/branch/master/netinstall.sh | bash -s -- --me --install-proton-ge
+curl -sL https://https://raw.githubusercontent.com/mze9412/asa-server-tools/refs/heads/master/netinstall.sh | bash -s -- --me --install-proton-ge
 
 Configuration
 ~~~~~~~~~~~~~
@@ -621,7 +622,7 @@ e.g. `notifyvar_instancename="My Instance"` will replace `{instancename}` with `
 
 `notifyCommand`::
     Notify command to run.  Notify message will be in `${notifymsg}`, and templated message will be in `${msg}`
-+
+
 e.g. `notifyCommand='echo "$msg" | mailx -s "Message from instance ${instance} on server ${HOSTNAME}" "email@domain.com"'`
 
 `logdir`::
