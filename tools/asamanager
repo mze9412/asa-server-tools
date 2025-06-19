@@ -2755,47 +2755,51 @@ printStatus(){
     echo -e "$NORMAL" "Server listening: " "$RED" "No" "$NORMAL"
   else
     echo -e "$NORMAL" "Server listening: " "$GREEN" "Yes" "$NORMAL"
-    perl -MSocket -e '
-      my $port = int($ARGV[0]);
-      socket(my $socket, PF_INET, SOCK_DGRAM, 0);
-      setsockopt($socket, SOL_SOCKET, SO_RCVTIMEO, pack("i4", 1, 0, 0, 0));
-      my $sockaddr = pack_sockaddr_in($port, inet_aton($ARGV[1]));
-      send($socket, "\xff\xff\xff\xffTSource Engine Query\x00", 0, $sockaddr);
-      my $data = "";
-      recv($socket, $data, 1400, 0) or (print "Unable to query server\n" and exit(1));
-      my ($servername, $mapname, $game, $fullname, $rest) = split(/\x00/, substr($data, 6), 5);
-      my $players = ord(substr($rest, 2, 1));
-      my $maxplayers = ord(substr($rest, 3, 1));
-      print "Server Name: $servername\n";
-      print "Steam Players: $players / $maxplayers\n";
-      send($socket, "\xff\xff\xff\xff\x55\xff\xff\xff\xff", 0, $sockaddr);
-      $data = "";
-      recv($socket, $data, 1400, 0) or (print "Challenge request failed" and exit(1));
-      if (ord(substr($data, 4, 1)) == 0x41) {
-        my $chal = substr($data, 5);
-        send($socket, "\xff\xff\xff\xff\x55" . $chal, 0, $sockaddr);
-        $data = "";
-        recv($socket, $data, 1400, 0) or (print "A2S_PLAYERS request failed" and exit(1));
-      }
-      ord(substr($data, 4, 1)) != 0x44 and (print ("A2S_PLAYERS Response: : " . unpack("H*", $data)) and exit(1));
-      my $players = ord(substr($data, 5, 1));
-      my $active = 0;
-      my $pdata = substr($data, 6);
-      for my $i (0 .. $players) {
-        my $idx = ord(substr($pdata, 0, 1));
-        my ($name, $rest) = split(/\x00/, substr($pdata, 1), 2);
-        $pdata = substr($rest, 8);
-        if ($name ne "") {
-          $active = $active + 1;
-        }
-      }
-      print "Active Steam Players: $active\n";
-      ' "$(getQueryPort)" "$(getMultiHomeIP)"
+    read serverName playerCount gamePort < <(curl -sL localhost:8888/v1/query | jq -r '.data.serverName, .data.playerCount, (.data.ports[] | select(.type=="game").port)')
+    # perl -MSocket -e '
+    #   my $port = int($ARGV[0]);
+    #   socket(my $socket, PF_INET, SOCK_DGRAM, 0);
+    #   setsockopt($socket, SOL_SOCKET, SO_RCVTIMEO, pack("i4", 1, 0, 0, 0));
+    #   my $sockaddr = pack_sockaddr_in($port, inet_aton($ARGV[1]));
+    #   send($socket, "\xff\xff\xff\xffTSource Engine Query\x00", 0, $sockaddr);
+    #   my $data = "";
+    #   recv($socket, $data, 1400, 0) or (print "Unable to query server\n" and exit(1));
+    #   my ($servername, $mapname, $game, $fullname, $rest) = split(/\x00/, substr($data, 6), 5);
+    #   my $players = ord(substr($rest, 2, 1));
+    #   my $maxplayers = ord(substr($rest, 3, 1));
+    #   print "Server Name: $servername\n";
+    #   print "Steam Players: $players / $maxplayers\n";
+    #   send($socket, "\xff\xff\xff\xff\x55\xff\xff\xff\xff", 0, $sockaddr);
+    #   $data = "";
+    #   recv($socket, $data, 1400, 0) or (print "Challenge request failed" and exit(1));
+    #   if (ord(substr($data, 4, 1)) == 0x41) {
+    #     my $chal = substr($data, 5);
+    #     send($socket, "\xff\xff\xff\xff\x55" . $chal, 0, $sockaddr);
+    #     $data = "";
+    #     recv($socket, $data, 1400, 0) or (print "A2S_PLAYERS request failed" and exit(1));
+    #   }
+    #   ord(substr($data, 4, 1)) != 0x44 and (print ("A2S_PLAYERS Response: : " . unpack("H*", $data)) and exit(1));
+    #   my $players = ord(substr($data, 5, 1));
+    #   my $active = 0;
+    #   my $pdata = substr($data, 6);
+    #   for my $i (0 .. $players) {
+    #     my $idx = ord(substr($pdata, 0, 1));
+    #     my ($name, $rest) = split(/\x00/, substr($pdata, 1), 2);
+    #     $pdata = substr($rest, 8);
+    #     if ($name ne "") {
+    #       $active = $active + 1;
+    #     }
+    #   }
+    #   print "Active Steam Players: $active\n";
+    #   ' "$(getQueryPort)" "$(getMultiHomeIP)"
 
+    # if serverName and playerCount are not empty, we consider the server online
     if isTheServerOnline; then
       echo -e "$NORMAL" "Server online: " "$GREEN" "Yes" "$NORMAL"
-      echo -e "$NORMAL" "ARKServers link: " "$GREEN" "http://arkservers.net/server/${publicip}:$(getQueryPort)" "$NORMAL"
-      echo -e "$NORMAL" "Steam connect link: " "$GREEN" "steam://connect/${publicip}:$(getQueryPort)" "$NORMAL"
+      echo -e "$NORMAL" "Server name: " "$GREEN" "${serverName:-Unknown}" "$NORMAL"
+      echo -e "$NORMAL" "Players online: " "$GREEN" "${playerCount:-0}" "$NORMAL"
+      echo -e "$NORMAL" "ARKServers link: " "$GREEN" "http://arkservers.net/server/${publicip}:$(gamePort)" "$NORMAL"
+      # echo -e "$NORMAL" "Steam connect link: " "$GREEN" "steam://connect/${publicip}:$(getQueryPort)" "$NORMAL"
     else
       echo -e "$NORMAL" "Server online: " "$RED" "No" "$NORMAL"
     fi
