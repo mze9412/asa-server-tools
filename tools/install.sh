@@ -380,7 +380,8 @@ if [ "$installproton" = "yes" ]; then
     wget "$PROTON_URL" -O "/home/steam/game-resources/$PROTON_TGZ"
   fi
   
-  STEAMDIR="$COMPATDIR/.local/share/Steam"
+  
+  STEAMDIR="$HOME/.local/share/Steam"
   # Extract GE Proton into this user's Steam path
   [ -d "$STEAMDIR/compatibilitytools.d" ] || sudo -u steam mkdir -p "$STEAMDIR/compatibilitytools.d"
   sudo -u steam tar -x -C "$STEAMDIR/compatibilitytools.d/" -f "/home/steam/game-resources/$PROTON_TGZ"
