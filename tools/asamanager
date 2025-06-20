@@ -1047,25 +1047,35 @@ function isTheServerUp(){
 # Check if the server is visible in the steam server list
 #
 function isTheServerOnline(){
-  if [ -n "$(getMultiHome)" ]; then
-    publicip="$(curl --interface "$(getMultiHomeIP)" -s https://api.ipify.org/)"
-  else
-    publicip="$(curl -s https://api.ipify.org/)"
-  fi
-  local serverresp
-
-  if [[ "$publicip" =~ [1-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]* ]]; then
-    serverresp="$(curl -s "http://api.steampowered.com/ISteamApps/GetServersAtAddress/v0001?addr=${publicip}:$(getQueryPort)")"
-  fi
-
-  # If the Steam server response contains "addr": "$ip:$port",
-  # then the server has registered with the Steam master server
-  if [[ "$serverresp" =~ \"addr\":[[:space:]]*\"([^\"]*):([0-9]*)\" ]]; then
+  # Query the local server status endpoint and check if data.ready is true
+  local ready
+  ready="$(curl -s http://localhost:8888/v1/query | jq -r '.data.ready')"
+  if [[ "$ready" == "true" ]]; then
     return 0
   else
     return 1
   fi
 }
+# function isTheServerOnline(){
+#   if [ -n "$(getMultiHome)" ]; then
+#     publicip="$(curl --interface "$(getMultiHomeIP)" -s https://api.ipify.org/)"
+#   else
+#     publicip="$(curl -s https://api.ipify.org/)"
+#   fi
+#   local serverresp
+
+#   if [[ "$publicip" =~ [1-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]* ]]; then
+#     serverresp="$(curl -s "http://api.steampowered.com/ISteamApps/GetServersAtAddress/v0001?addr=${publicip}:$(getQueryPort)")"
+#   fi
+
+#   # If the Steam server response contains "addr": "$ip:$port",
+#   # then the server has registered with the Steam master server
+#   if [[ "$serverresp" =~ \"addr\":[[:space:]]*\"([^\"]*):([0-9]*)\" ]]; then
+#     return 0
+#   else
+#     return 1
+#   fi
+# }
 
 #
 # Check if anybody is connected to the server
@@ -2755,7 +2765,10 @@ printStatus(){
     echo -e "$NORMAL" "Server listening: " "$RED" "No" "$NORMAL"
   else
     echo -e "$NORMAL" "Server listening: " "$GREEN" "Yes" "$NORMAL"
-    read serverName playerCount gamePort < <(curl -sL localhost:8888/v1/query | jq -r '.data.serverName, .data.playerCount, (.data.ports[] | select(.type=="game").port)')
+    IFS= read -r -d '' serverName playerCount gamePort < <(
+      curl -sL localhost:8888/v1/query | jq -r -j '.data.serverName, "\u0000", .data.playerCount, "\u0000", (.data.ports[] | select(.type=="game").port), "\u0000"'
+    )
+    # read serverName playerCount gamePort < <(curl -sL localhost:8888/v1/query | jq -r '.data.serverName, .data.playerCount, (.data.ports[] | select(.type=="game").port)')
     # perl -MSocket -e '
     #   my $port = int($ARGV[0]);
     #   socket(my $socket, PF_INET, SOCK_DGRAM, 0);
@@ -2798,7 +2811,7 @@ printStatus(){
       echo -e "$NORMAL" "Server online: " "$GREEN" "Yes" "$NORMAL"
       echo -e "$NORMAL" "Server name: " "$GREEN" "${serverName:-Unknown}" "$NORMAL"
       echo -e "$NORMAL" "Players online: " "$GREEN" "${playerCount:-0}" "$NORMAL"
-      echo -e "$NORMAL" "ARKServers link: " "$GREEN" "http://arkservers.net/server/${publicip}:$(gamePort)" "$NORMAL"
+      # echo -e "$NORMAL" "ARKServers link: " "$GREEN" "http://arkservers.net/server/${publicip}:${gamePort}" "$NORMAL"
       # echo -e "$NORMAL" "Steam connect link: " "$GREEN" "steam://connect/${publicip}:$(getQueryPort)" "$NORMAL"
     else
       echo -e "$NORMAL" "Server online: " "$RED" "No" "$NORMAL"
