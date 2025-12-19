@@ -373,22 +373,29 @@ if [ "$installproton" = "yes" ]; then
   PROTON_TGZ="$(basename "$PROTON_URL")"
   PROTON_NAME="$(basename "$PROTON_TGZ" ".tar.gz")"
 
-  # use COMPATDIR as base directory for PROTON_GE logic below
-  if [ ! -e "$COMPATDIR/$PROTON_TGZ" ]; then
-    # Create a directory to store the downloaded Proton
-    [ -d "/home/steam/game-resources" ] || sudo -u steam mkdir -p "/home/steam/game-resources"
-    wget "$PROTON_URL" -O "/home/steam/game-resources/$PROTON_TGZ"
+  # Determine the steam user's home directory
+  if [ "$userinstall" = "yes" ]; then
+    STEAM_HOME="$HOME"
+  else
+    STEAM_HOME="$(getent passwd "$steamcmd_user" | cut -d: -f6)"
+  fi
+
+  # Create a directory to store the downloaded Proton
+  if [ ! -e "$STEAM_HOME/game-resources/$PROTON_TGZ" ]; then
+    sudo -u "$steamcmd_user" mkdir -p "$STEAM_HOME/game-resources"
+    sudo -u "$steamcmd_user" wget "$PROTON_URL" -O "$STEAM_HOME/game-resources/$PROTON_TGZ"
   fi
   
-  
-  STEAMDIR="$HOME/.local/share/Steam"
-  # Extract GE Proton into this user's Steam path
-  [ -d "$STEAMDIR/compatibilitytools.d" ] || sudo -u steam mkdir -p "$STEAMDIR/compatibilitytools.d"
-  sudo -u steam tar -x -C "$STEAMDIR/compatibilitytools.d/" -f "/home/steam/game-resources/$PROTON_TGZ"
+  STEAMDIR="$STEAM_HOME/.local/share/Steam"
+  # Extract GE Proton into the steam user's Steam path
+  sudo -u "$steamcmd_user" mkdir -p "$STEAMDIR/compatibilitytools.d"
+  sudo -u "$steamcmd_user" tar -x -C "$STEAMDIR/compatibilitytools.d/" -f "$STEAM_HOME/game-resources/$PROTON_TGZ"
 
   # Install default prefix into game compatdata path
-  [ -d "$STEAMDIR/steamapps/compatdata" ] || sudo -u steam mkdir -p "$STEAMDIR/steamapps/compatdata"
-  [ -d "$STEAMDIR/steamapps/compatdata/2430930" ] || sudo -u steam cp "$STEAMDIR/compatibilitytools.d/$PROTON_NAME/files/share/default_pfx" "$STEAMDIR/steamapps/compatdata/2430930" -r
+  sudo -u "$steamcmd_user" mkdir -p "$STEAMDIR/steamapps/compatdata"
+  if [ ! -d "$STEAMDIR/steamapps/compatdata/2430930" ]; then
+    sudo -u "$steamcmd_user" cp -r "$STEAMDIR/compatibilitytools.d/$PROTON_NAME/files/share/default_pfx" "$STEAMDIR/steamapps/compatdata/2430930"
+  fi
 fi
 
 exit 0
