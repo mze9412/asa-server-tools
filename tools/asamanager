@@ -21,13 +21,13 @@ fi
 set +o allexport
 
 # Script version
-arkstVersion='1.6'
+arkstVersion='2.1'
 
 ### The following variables are changed by an installer or package manager, and are excluded from git blob hash calculation
 ### If an override is added, do not put anything after arkstSomeOverride='' in a commit
 
 # Set by installer to git tag (i.e. release version)
-arkstTag='v1.6.62'
+arkstTag='v2.1'
 
 # Set by installer to git commit
 arkstCommit='17bcc0b4f8c7cc01603ff308f28b98cd54429e21'
