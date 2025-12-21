@@ -210,6 +210,184 @@ doUninstallTools() {
   fi
 }
 
+doUpdateProton() {
+  echo "Fetching latest GE-Proton release..."
+  
+  # Get latest release info from GitHub API
+  local release_info
+  release_info=$(curl -s "https://api.github.com/repos/GloriousEggroll/proton-ge-custom/releases/latest")
+  
+  local latest_tag
+  latest_tag=$(echo "$release_info" | grep -oP '"tag_name":\s*"\K[^"]+')
+  
+  if [ -z "$latest_tag" ]; then
+    echo "ERROR: Failed to fetch latest GE-Proton version"
+    exit 1
+  fi
+  
+  local latest_version="${latest_tag#GE-}"
+  local proton_url
+  proton_url=$(echo "$release_info" | grep -oP '"browser_download_url":\s*"\K[^"]+\.tar\.gz' | head -n 1)
+  
+  if [ -z "$proton_url" ]; then
+    echo "ERROR: Failed to find download URL for $latest_tag"
+    exit 1
+  fi
+  
+  echo "Latest version: $latest_tag"
+  echo "Current version: ${linux_useGeProton:-not set}"
+  
+  # Determine steam user home directory
+  local steam_home
+  if [ "$steamcmd_user" == "--me" ]; then
+    steam_home="$HOME"
+  else
+    steam_home="$(getent passwd "$steamcmd_user" | cut -d: -f6)"
+  fi
+  
+  if [ -z "$steam_home" ]; then
+    echo "ERROR: Could not determine steam user home directory"
+    exit 1
+  fi
+  
+  local compat_dir="$steam_home/.local/share/Steam/compatibilitytools.d"
+  local download_dir="$steam_home/game-resources"
+  local proton_file="$latest_tag.tar.gz"
+  
+  # Check if already latest version
+  if [ -d "$compat_dir/$latest_tag" ]; then
+    echo "Latest version $latest_tag is already installed"
+    
+    # Still update config if different
+    if [ "$linux_useGeProton" != "$latest_tag" ]; then
+      echo "Updating configuration to use $latest_tag"
+      
+      local config_file
+      if [ "$steamcmd_user" == "--me" ]; then
+        config_file="$HOME/$arkstUserCfgFile"
+      else
+        config_file="$arkstGlobalCfgFile"
+      fi
+      
+      if [ -f "$config_file" ]; then
+        local sudo=sudo
+        if [ "$(id -u)" == 0 ] || [ "$steamcmd_user" == "--me" ]; then
+          sudo=
+        fi
+        $sudo sed -i "s|^linux_useGeProton=.*|linux_useGeProton=\"$latest_tag\"|" "$config_file"
+        echo "Configuration updated. Please restart any running servers for changes to take effect."
+      fi
+    fi
+    
+    return 0
+  fi
+  
+  # Check if server is running before proceeding
+  local was_running=0
+  local instances_to_restart=()
+  
+  for instance_config in "${!cfgfile[@]}"; do
+    local instance="${instance_config#configfile_}"
+    if isRunning "$instance"; then
+      was_running=1
+      instances_to_restart+=("$instance")
+      echo "Instance @$instance is running"
+    fi
+  done
+  
+  if [ $was_running -eq 1 ]; then
+    echo ""
+    echo "The following instances are currently running:"
+    for instance in "${instances_to_restart[@]}"; do
+      echo "  - @$instance"
+    done
+    echo ""
+    read -p "Stop these instances to update GE-Proton? [y/N] " -n 1 -r
+    echo
+    
+    if [[ ! "$REPLY" =~ ^[Yy]$ ]]; then
+      echo "Update cancelled"
+      exit 0
+    fi
+    
+    echo "Stopping running instances..."
+    for instance in "${instances_to_restart[@]}"; do
+      doStop "$instance"
+    done
+  fi
+  
+  # Download new version
+  echo "Downloading $latest_tag..."
+  mkdir -p "$download_dir"
+  
+  if [ -f "$download_dir/$proton_file" ]; then
+    echo "File already exists, removing old download..."
+    rm "$download_dir/$proton_file"
+  fi
+  
+  if ! wget -q --show-progress "$proton_url" -O "$download_dir/$proton_file"; then
+    echo "ERROR: Failed to download GE-Proton"
+    exit 1
+  fi
+  
+  # Extract to compatibility tools directory
+  echo "Installing $latest_tag..."
+  mkdir -p "$compat_dir"
+  
+  if ! tar -xzf "$download_dir/$proton_file" -C "$compat_dir"; then
+    echo "ERROR: Failed to extract GE-Proton"
+    exit 1
+  fi
+  
+  # Update prefix if it exists
+  local prefix_dir="$steam_home/.local/share/Steam/steamapps/compatdata/2430930"
+  if [ -d "$prefix_dir" ] && [ -d "$compat_dir/$latest_tag/files/share/default_pfx" ]; then
+    echo "Updating prefix..."
+    rm -rf "$prefix_dir"
+    cp -r "$compat_dir/$latest_tag/files/share/default_pfx" "$prefix_dir"
+  fi
+  
+  # Update configuration
+  echo "Updating configuration..."
+  local config_file
+  if [ "$steamcmd_user" == "--me" ]; then
+    config_file="$HOME/$arkstUserCfgFile"
+  else
+    config_file="$arkstGlobalCfgFile"
+  fi
+  
+  if [ -f "$config_file" ]; then
+    local sudo=sudo
+    if [ "$(id -u)" == 0 ] || [ "$steamcmd_user" == "--me" ]; then
+      sudo=
+    fi
+    
+    if grep -q "^linux_useGeProton=" "$config_file"; then
+      $sudo sed -i "s|^linux_useGeProton=.*|linux_useGeProton=\"$latest_tag\"|" "$config_file"
+    else
+      $sudo sed -i "/^# GE Proton configuration/a linux_useGeProton=\"$latest_tag\"" "$config_file"
+    fi
+  fi
+  
+  echo "Successfully installed and configured $latest_tag"
+  
+  # Restart instances if they were running
+  if [ $was_running -eq 1 ]; then
+    echo ""
+    read -p "Restart stopped instances? [Y/n] " -n 1 -r
+    echo
+    
+    if [[ ! "$REPLY" =~ ^[Nn]$ ]]; then
+      echo "Restarting instances..."
+      for instance in "${instances_to_restart[@]}"; do
+        doStart "$instance"
+      done
+    fi
+  fi
+  
+  echo "GE-Proton update complete!"
+}
+
 runAsRoot(){
   getConfigVar(){
     val="$(echo -ne "$(sed -n "/^$1=/{s|^[^=]*=||;s|[[:space:]]*\\(#.*\\)*\$||;s|^\"\\(.*\\)\"\$|\\1|;s|^'\\(.*\\)'\$|\\1|;p}" <"${arkstGlobalCfgFile}" | tail -n1)")"
@@ -3107,6 +3285,7 @@ showUsage() {
         Commands that take no instances:
         Command               Description
         upgrade-tools         Check for a new ARK Server Tools version and upgrades it if needed
+        update-proton         Download and install the latest GE-Proton version
         uninstall-tools       Uninstall the ARK Server Tools
         useconfig <name>      Sets the default instance for the commands that follow
         list-instances        Lists all available instances
@@ -3299,6 +3478,10 @@ main(){
     case "$command" in
       upgrade-tools)
         doUpgradeTools
+        exit
+      ;;
+      update-proton)
+        doUpdateProton
         exit
       ;;
       uninstall-tools)
