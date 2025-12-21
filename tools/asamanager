@@ -1516,6 +1516,11 @@ doStart() {
       prestart="${arkPreStart}"
     fi
 
+    # Ensure the WindowsServer config directory exists
+    if [[ ! -d "${savedcfgdir}" ]]; then
+      mkdir -p "${savedcfgdir}"
+    fi
+
     if [[ -n "${gusini}" && -f "${gusini}" ]]; then
       cp "${gusini}" "${savedcfgdir}/GameUserSettings.ini"
     fi
