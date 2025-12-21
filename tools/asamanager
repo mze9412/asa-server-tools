@@ -1699,6 +1699,13 @@ doStart() {
       mkdir -p "${savedcfgdir}"
     fi
 
+    # Remove steamclient64.dll if it exists (causes crashes with Proton)
+    local steamclient_dll="${arkserverroot}/${arkserverexec%/*}/steamclient64.dll"
+    if [[ -f "${steamclient_dll}" ]]; then
+      rm -f "${steamclient_dll}"
+      logprint "Removed steamclient64.dll (incompatible with Proton)"
+    fi
+
     if [[ -n "${gusini}" && -f "${gusini}" ]]; then
       cp "${gusini}" "${savedcfgdir}/GameUserSettings.ini"
     fi
