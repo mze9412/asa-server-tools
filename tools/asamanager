@@ -2955,10 +2955,13 @@ printStatus(){
     echo -e "$NORMAL" "Server listening: " "$RED" "No" "$NORMAL"
   else
     echo -e "$NORMAL" "Server listening: " "$GREEN" "Yes" "$NORMAL"
-    IFS= read -r -d '' serverName playerCount gamePort < <(
-      curl -sL localhost:8888/v1/query | jq -r -j '.data.serverName, "\u0000", .data.playerCount, "\u0000", (.data.ports[] | select(.type=="game").port), "\u0000"'
-    )
-    # read serverName playerCount gamePort < <(curl -sL localhost:8888/v1/query | jq -r '.data.serverName, .data.playerCount, (.data.ports[] | select(.type=="game").port)')
+    local query_result
+    query_result="$(curl -sL localhost:8888/v1/query 2>/dev/null)"
+    if [ -n "$query_result" ]; then
+      serverName="$(echo "$query_result" | jq -r '.data.serverName // "Unknown"')"
+      playerCount="$(echo "$query_result" | jq -r '.data.playerCount // "0"')"
+      gamePort="$(echo "$query_result" | jq -r '(.data.ports[] | select(.type=="game").port) // "0"' | head -n1)"
+    fi
     # perl -MSocket -e '
     #   my $port = int($ARGV[0]);
     #   socket(my $socket, PF_INET, SOCK_DGRAM, 0);
