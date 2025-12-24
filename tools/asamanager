@@ -1706,6 +1706,33 @@ doStart() {
       logprint "Removed steamclient64.dll (incompatible with Proton)"
     fi
 
+    # Apply Wine DLL override for xaudio2_9 to prevent crashes with BinkMediaPlayer
+    if [[ -n "$linux_useGeProton" || -n "$linux_useLutrisGeProton" ]]; then
+      local steam_home
+      if [ "$steamcmd_user" == "--me" ]; then
+        steam_home="$HOME"
+      else
+        steam_home="$(getent passwd "$steamcmd_user" | cut -d: -f6)"
+      fi
+      
+      local wine_prefix="$steam_home/.local/share/Steam/steamapps/compatdata/2430930/pfx"
+      local proton_bin=""
+      
+      if [[ -n "$linux_useGeProton" ]]; then
+        proton_bin="$steam_home/.local/share/Steam/compatibilitytools.d/$linux_useGeProton/files/bin/wine64"
+      elif [[ -n "$linux_useLutrisGeProton" ]]; then
+        proton_bin="$steam_home/.local/share/Steam/compatibilitytools.d/$linux_useLutrisGeProton/bin/wine64"
+      fi
+      
+      if [[ -f "$proton_bin" && -d "$wine_prefix" ]]; then
+        # Check if override already exists
+        if ! WINEPREFIX="$wine_prefix" WINEARCH=win64 "$proton_bin" reg query "HKEY_CURRENT_USER\\Software\\Wine\\DllOverrides" /v xaudio2_9 2>/dev/null | grep -q "xaudio2_9"; then
+          logprint "Applying Wine DLL override for xaudio2_9 (prevents XAudio2 crashes)"
+          WINEPREFIX="$wine_prefix" WINEARCH=win64 "$proton_bin" reg add "HKEY_CURRENT_USER\\Software\\Wine\\DllOverrides" /v xaudio2_9 /t REG_SZ /d "" /f >/dev/null 2>&1
+        fi
+      fi
+    fi
+
     if [[ -n "${gusini}" && -f "${gusini}" ]]; then
       cp "${gusini}" "${savedcfgdir}/GameUserSettings.ini"
     fi
