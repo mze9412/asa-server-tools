@@ -1,7 +1,7 @@
 ### asamanager variables
 
 # Script version
-arkstVersion='2.1'
+arkstVersion='2.2'
 
 # Set by installer to git tag (i.e. release version)
 arkstTag=
