@@ -358,7 +358,8 @@ doUpdateProton() {
   
   if [ -f "$config_file" ]; then
     local sudo=sudo
-    if [ "$(id -u)" == 0 ] || [ "$steamcmd_user" == "--me" ]; then
+    # Don't use sudo if we're root, using --me, or if we're already the steamcmd_user
+    if [ "$(id -u)" == 0 ] || [ "$steamcmd_user" == "--me" ] || [ "$USERNAME" == "$steamcmd_user" ]; then
       sudo=
     fi
     
