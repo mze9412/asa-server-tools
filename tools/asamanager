@@ -271,7 +271,8 @@ doUpdateProton() {
       
       if [ -f "$config_file" ]; then
         local sudo=sudo
-        if [ "$(id -u)" == 0 ] || [ "$steamcmd_user" == "--me" ]; then
+        # Don't use sudo if we're root, using --me, or if we're already the steamcmd_user
+        if [ "$(id -u)" == 0 ] || [ "$steamcmd_user" == "--me" ] || [ "$(id -un)" == "$steamcmd_user" ]; then
           sudo=
         fi
         $sudo sed -i "s|^linux_useGeProton=.*|linux_useGeProton=\"$latest_tag\"|" "$config_file"
@@ -357,10 +358,33 @@ doUpdateProton() {
   fi
   
   if [ -f "$config_file" ]; then
+    local config_dir="${config_file%/*}"
     local sudo=sudo
     # Don't use sudo if we're root, using --me, or if we're already the steamcmd_user
-    if [ "$(id -u)" == 0 ] || [ "$steamcmd_user" == "--me" ] || [ "$USERNAME" == "$steamcmd_user" ]; then
+    if [ "$(id -u)" == 0 ] || [ "$steamcmd_user" == "--me" ] || [ "$(id -un)" == "$steamcmd_user" ]; then
       sudo=
+    fi
+    
+    # Check if we can write to the config directory
+    if [ -z "$sudo" ] && [ ! -w "$config_dir" ]; then
+      echo "ERROR: Cannot write to $config_dir"
+      echo "The current user '$(id -un)' does not have write permissions to the configuration directory."
+      echo ""
+      echo "To fix this issue, you can either:"
+      echo "  1. Add your user to the group that owns $config_dir:"
+      echo "     sudo usermod -a -G $(stat -c '%G' "$config_dir") $(id -un)"
+      echo "     (Then log out and log back in)"
+      echo ""
+      echo "  2. Change the ownership of the configuration directory:"
+      echo "     sudo chown -R $(id -un):$(id -gn) $config_dir"
+      echo ""
+      echo "  3. Add write permissions for all users (less secure):"
+      echo "     sudo chmod -R a+w $config_dir"
+      echo ""
+      echo "  4. Run this command with sudo:"
+      echo "     sudo asamanager update-proton"
+      echo ""
+      return 1
     fi
     
     if grep -q "^linux_useGeProton=" "$config_file"; then
