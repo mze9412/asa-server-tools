@@ -1,7 +1,7 @@
 ### asamanager variables
 
 # Script version
-arkstVersion='2.3'
+arkstVersion='2.4'
 
 # Set by installer to git tag (i.e. release version)
 arkstTag=
@@ -288,6 +288,7 @@ arkflag_automanagedmods=
 # Structure Destruction Tag - This was a one-time option when upgrading from before ASA v216
 arkopt_StructureDestructionTag=DestroySwampSnowStructures
 
+
 # Logs path (default /var/log/asatools)
 logdir="/var/log/asatools"
 
@@ -413,4 +414,3 @@ arkflag_epiconly=
 
 # Structure Destruction Tag - This was a one-time option when upgrading from before ASA v216
 arkopt_StructureDestructionTag=DestroySwampSnowStructures
-

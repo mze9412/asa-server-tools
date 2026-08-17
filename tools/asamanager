@@ -21,7 +21,7 @@ fi
 set +o allexport
 
 # Script version
-arkstVersion='2.3'
+arkstVersion='2.4'
 
 ### The following variables are changed by an installer or package manager, and are excluded from git blob hash calculation
 ### If an override is added, do not put anything after arkstSomeOverride='' in a commit
@@ -39,7 +39,7 @@ arkstUsePkgManager=''
 arkstRootUseEnv=''
 
 # Set this to override the main fork
-arkstGithubRepoOverride='mze9412/ark-server-tools'
+arkstGithubRepoOverride='mze9412/asa-server-tools'
 
 # Set this to override the global config file path
 arkstGlobalCfgFileOverride=''
@@ -96,12 +96,13 @@ doUpgradeToolsFromCommit(){
   fi
 
   local commit="$1"
-  tmpdir="$(mktemp -d "ark-server-tools-XXXXXXXX")"
+  local repo_name="${arkstGithubRepo##*/}"
+  tmpdir="$(mktemp -d "${repo_name}-XXXXXXXX")"
   if [ -z "$tmpdir" ]; then echo "Unable to create temporary directory"; exit 1; fi
   cd "$tmpdir"
   echo "Downloading installer"
   curl -s -L "https://github.com/${arkstGithubRepo}/archive/${commit}.tar.gz" | tar -xz
-  cd "ark-server-tools-${commit}/tools"
+  cd "${repo_name}-${commit}/tools"
   if [ ! -f "install.sh" ]; then echo "install.sh not found in $PWD"; exit 1; fi
   sed -i -e "s|^arkstCommit='.*'|arkstCommit='${commit}'|" \
          -e "s|^arkstTag='.*'|arkstTag='${tagname}'|" \
