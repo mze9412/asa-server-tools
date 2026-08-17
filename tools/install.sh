@@ -113,8 +113,6 @@ if [ "$userinstall" == "yes" ]; then
   CONFIGFILE="${PREFIX}/.asamanager.cfg"
   INSTANCEDIR="${PREFIX}/.config/asamanager/instances"
 
-  # COMPATDIR is in ~/.steam/steam/steamapps/compatdata
-  COMPATDIR="${HOME}/.steam/steam/steamapps/compatdata"
 else
   PREFIX="${PREFIX:-/usr/local}"
   EXECPREFIX="${EXECPREFIX:-${PREFIX}}"
@@ -122,8 +120,6 @@ else
   CONFIGFILE="/etc/asamanager/asamanager.cfg"
   INSTANCEDIR="/etc/asamanager/instances"
 
-  # COMPATDIR is in /home/STEAMCMD_USER/.steam/steam/steamapps/compatdata
-  COMPATDIR="/home/$steamcmd_user/.steam/steam/steamapps/compatdata"
 fi
 
 BINDIR="${BINDIR:-${EXECPREFIX}/bin}"

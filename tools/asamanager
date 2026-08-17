@@ -21,7 +21,7 @@ fi
 set +o allexport
 
 # Script version
-arkstVersion='2.2'
+arkstVersion='2.3'
 
 ### The following variables are changed by an installer or package manager, and are excluded from git blob hash calculation
 ### If an override is added, do not put anything after arkstSomeOverride='' in a commit
@@ -227,7 +227,9 @@ doUpdateProton() {
   
   local latest_version="${latest_tag#GE-}"
   local proton_url
-  proton_url=$(echo "$release_info" | grep -oP '"browser_download_url":\s*"\K[^"]+\.tar\.gz' | head -n 1)
+  # Releases include both x86_64 and architecture-suffixed aarch64 archives.
+  # The x86_64 archive name exactly matches the release tag.
+  proton_url=$(echo "$release_info" | grep -oP '"browser_download_url":\s*"\K[^"]+\.tar\.gz' | grep -F "/${latest_tag}.tar.gz" | head -n 1)
   
   if [ -z "$proton_url" ]; then
     echo "ERROR: Failed to find download URL for $latest_tag"
@@ -1560,14 +1562,14 @@ doRun() {
     echo
     # Put the server process into the background so we can monitor it
     if [ -n "$linux_useGeProton" ]; then
-      /home/steam/.local/share/Steam/compatibilitytools.d/$linux_useGeProton/proton run "$arkserverroot/$arkserverexec" "$arkserveropts" "${arkextraopts[@]}" &
+      /home/steam/.local/share/Steam/compatibilitytools.d/$linux_useGeProton/proton runinprefix "$arkserverroot/$arkserverexec" "$arkserveropts" "${arkextraopts[@]}" &
     elif [ -n "$linux_useLutrisGeProton" ]; then 
       WINEDEBUG=-all /home/steam/.local/share/Steam/compatibilitytools.d/$linux_useLutrisGeProton/bin/wine64 "$arkserverroot/$arkserverexec" "$arkserveropts" "${arkextraopts[@]}" &
     else
       "$arkserverroot/$arkserverexec" "$arkserveropts" "${arkextraopts[@]}" &
     fi
     # WINEDEBUG=-all /home/steam/.local/share/Steam/compatibilitytools.d/lutris-GE-Proton8-26-x86_64/bin/wine64 "$arkserverroot/$arkserverexec" "$arkserveropts" "${arkextraopts[@]}" &
-    #/home/steam/.local/share/Steam/compatibilitytools.d/GE-Proton9-4/proton run "$arkserverroot/$arkserverexec" "$arkserveropts" "${arkextraopts[@]}" &
+    #/home/steam/.local/share/Steam/compatibilitytools.d/GE-Proton9-4/proton runinprefix "$arkserverroot/$arkserverexec" "$arkserveropts" "${arkextraopts[@]}" &
 
     # Grab the server PID
     serverpid=$!
