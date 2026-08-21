@@ -21,7 +21,7 @@ fi
 set +o allexport
 
 # Script version
-arkstVersion='2.4'
+arkstVersion='2.5'
 
 ### The following variables are changed by an installer or package manager, and are excluded from git blob hash calculation
 ### If an override is added, do not put anything after arkstSomeOverride='' in a commit
@@ -227,10 +227,9 @@ doUpdateProton() {
   fi
   
   local latest_version="${latest_tag#GE-}"
+  local proton_name="${latest_tag}-x86_64"
   local proton_url
-  # Releases include both x86_64 and architecture-suffixed aarch64 archives.
-  # The x86_64 archive name exactly matches the release tag.
-  proton_url=$(echo "$release_info" | grep -oP '"browser_download_url":\s*"\K[^"]+\.tar\.gz' | grep -F "/${latest_tag}.tar.gz" | head -n 1)
+  proton_url=$(echo "$release_info" | grep -oP '"browser_download_url":\s*"\K[^"]+\.tar\.gz' | grep -F "/${proton_name}.tar.gz" | head -n 1)
   
   if [ -z "$proton_url" ]; then
     echo "ERROR: Failed to find download URL for $latest_tag"
@@ -255,15 +254,15 @@ doUpdateProton() {
   
   local compat_dir="$steam_home/.local/share/Steam/compatibilitytools.d"
   local download_dir="$steam_home/game-resources"
-  local proton_file="$latest_tag.tar.gz"
+  local proton_file="${proton_name}.tar.gz"
   
   # Check if already latest version
-  if [ -d "$compat_dir/$latest_tag" ]; then
-    echo "Latest version $latest_tag is already installed"
+  if [ -d "$compat_dir/$proton_name" ]; then
+    echo "Latest version $proton_name is already installed"
     
     # Still update config if different
-    if [ "$linux_useGeProton" != "$latest_tag" ]; then
-      echo "Updating configuration to use $latest_tag"
+    if [ "$linux_useGeProton" != "$proton_name" ]; then
+      echo "Updating configuration to use $proton_name"
       
       local config_file
       if [ "$steamcmd_user" == "--me" ]; then
@@ -278,7 +277,7 @@ doUpdateProton() {
         if [ "$(id -u)" == 0 ] || [ "$steamcmd_user" == "--me" ] || [ "$(id -un)" == "$steamcmd_user" ]; then
           sudo=
         fi
-        $sudo sed -i "s|^linux_useGeProton=.*|linux_useGeProton=\"$latest_tag\"|" "$config_file"
+        $sudo sed -i "s|^linux_useGeProton=.*|linux_useGeProton=\"$proton_name\"|" "$config_file"
         echo "Configuration updated. Please restart any running servers for changes to take effect."
       fi
     fi
@@ -342,13 +341,18 @@ doUpdateProton() {
     echo "ERROR: Failed to extract GE-Proton"
     exit 1
   fi
+
+  if [ ! -d "$compat_dir/$proton_name" ]; then
+    echo "ERROR: GE-Proton archive did not contain expected directory $proton_name"
+    exit 1
+  fi
   
   # Update prefix if it exists
   local prefix_dir="$steam_home/.local/share/Steam/steamapps/compatdata/2430930"
-  if [ -d "$prefix_dir" ] && [ -d "$compat_dir/$latest_tag/files/share/default_pfx" ]; then
+  if [ -d "$prefix_dir" ] && [ -d "$compat_dir/$proton_name/files/share/default_pfx" ]; then
     echo "Updating prefix..."
     rm -rf "$prefix_dir"
-    cp -r "$compat_dir/$latest_tag/files/share/default_pfx" "$prefix_dir"
+    cp -r "$compat_dir/$proton_name/files/share/default_pfx" "$prefix_dir"
   fi
   
   # Update configuration
@@ -391,13 +395,13 @@ doUpdateProton() {
     fi
     
     if grep -q "^linux_useGeProton=" "$config_file"; then
-      $sudo sed -i "s|^linux_useGeProton=.*|linux_useGeProton=\"$latest_tag\"|" "$config_file"
+      $sudo sed -i "s|^linux_useGeProton=.*|linux_useGeProton=\"$proton_name\"|" "$config_file"
     else
-      $sudo sed -i "/^# GE Proton configuration/a linux_useGeProton=\"$latest_tag\"" "$config_file"
+      $sudo sed -i "/^# GE Proton configuration/a linux_useGeProton=\"$proton_name\"" "$config_file"
     fi
   fi
   
-  echo "Successfully installed and configured $latest_tag"
+  echo "Successfully installed and configured $proton_name"
   
   # Restart instances if they were running
   if [ $was_running -eq 1 ]; then
